@@ -17,6 +17,8 @@
 
 #include "server_utils.hpp"
 
+// utils.py
+
 const string FUNCOBJ = 'funcs/index-allfuncs';
 
 const unsigned NUM_EXEC_THREADS = 3;
@@ -62,5 +64,19 @@ set<string> get_ip_set(string request_ip, SocketCache socket_cache);
 // exec_threads=False is implemented
 
 set<string> find_dag_source(Dag dag);
+
+// call.py
+
+// moved to scheduler_handlers.hpp: call_function
+
+GenericResponse call_dag(DagCall call, SocketCache pusher_cache,
+        map<string, pair<Dag, set<string>> dags, BaseDropletSchedulerPolicy policy);
+
+
+// create.py
+
+// moved to scheduler_handlers.hpp: create_function, create_dag, delete_dag
+
+
 
 #endif //DROPLET_SCHEDULER_UTILS_HPP

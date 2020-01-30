@@ -18,7 +18,7 @@
 const unsigned METADATA_THRESHOLD = 5;
 const unsigned REPORT_THRESHOLD = 5;
 
-void run_scheduler(string ip, string mgmt_ip, vector<UserRoutingThread> routing_threads){
+void run_scheduler(string ip, string mgmt_ip, string rout_addr){
     bool local = mgmt_ip.compare("") == 0;
     KvsClient kvs(); //TODO: fill in constructor
 
@@ -27,6 +27,15 @@ void run_scheduler(string ip, string mgmt_ip, vector<UserRoutingThread> routing_
 
     // Tracks how often a request for each function is received.
     map<string, unsigned> call_frequency;
+
+    // Tracks the most recent arrival for each DAG -- used to calculate interarrival times.
+    map<string, unsigned> last_arrivals;
+
+    // Tracks the time interval between successive requests for a particular DAG.
+    map<string, unsigned> interarrivals;
+
+    // Maintains a list of all other schedulers in the system, so we can propagate metadata to them.
+    vector<string> schedulers;
 
     zmq::context_t context(1);
 
