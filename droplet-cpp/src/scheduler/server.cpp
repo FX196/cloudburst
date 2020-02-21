@@ -19,6 +19,13 @@ const unsigned METADATA_THRESHOLD = 5;
 const unsigned REPORT_THRESHOLD = 5;
 
 void run_scheduler(string ip, string mgmt_ip, string rout_addr){
+
+    // set up logging
+    string log_file = "log_" + std::to_string(ip) + ".txt";
+    string log_name = "scheduler_log_" + std::to_string(ip);
+    auto log = spdlog::basic_logger_mt(log_name, log_file, true);
+    log->flush_on(spdlog::level::info);
+
     bool local = mgmt_ip.compare("") == 0;
     KvsClient kvs(); //TODO: fill in constructor
 

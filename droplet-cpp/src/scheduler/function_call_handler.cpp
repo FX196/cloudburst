@@ -12,9 +12,7 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "scheduler/scheduler_handlers.hpp"
-
-void connect_handler(zmq::socket_t &connect_socket, string route_addr, logger log){
-    string msg = kZmqUtil->recv_string(&connect_socket);
-    kZmqUtil->send_string(route_addr, &connect_socket);
+void function_call_handler(zmq::socket_t &func_call_socket,
+SocketCache &pusher_cache, BaseDropletSchedulerPolicy &policy, logger log){
+    // TODO: Wait for Chenggang
 }

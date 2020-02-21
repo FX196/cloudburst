@@ -95,4 +95,15 @@ inline string get_user_msg_inbox_addr(string ip, string tid) {
     return 'tcp://' + ip + ':' + std::to_string(std::stoi(tid) + RECV_INBOX_PORT);
 }
 
+
+YAML::Node load_conf(string filename){
+    return YAML::LoadFile(filename);
+}
+
+bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log);
+
+string kvs_get(KvsClientInterface *kvs, string key, logger log);
+
+// generate_timestamp implemented in common.hpp
+
 #endif //DROPLET_SERVER_UTILS_HPP
