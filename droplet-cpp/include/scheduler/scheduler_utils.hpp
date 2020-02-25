@@ -16,6 +16,7 @@
 #define DROPLET_SCHEDULER_UTILS_HPP
 
 #include "server_utils.hpp"
+#include "droplet.pb.h"
 
 // utils.py
 

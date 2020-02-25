@@ -24,9 +24,6 @@ SET(KV_LIBRARY_DEPENDENCIES
         yaml-cpp
         )
 
-SET(SCHEDULER_SOURCE
-        #        server.cpp
-        server_utils.cpp)
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/target/scheduler)
 
