@@ -30,8 +30,9 @@ ENDIF()
 SET(CMAKE_CXX_STANDARD 11)
 SET(CMAKE_CXX_STANDARD_REQUIRED on)
 
-SET(VENDOR_DIR ../common/vendor)
 SET(COMMON_DIR ../common)
+SET(VENDOR_DIR ${COMMON_DIR}/vendor)
+
 
 IF(${CMAKE_CXX_COMPILER} STREQUAL "/usr/bin/clang++")
     SET(CMAKE_CXX_FLAGS_COMMON
@@ -71,21 +72,21 @@ INCLUDE(FindProtobuf)
 FIND_PACKAGE(Protobuf REQUIRED)
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
 PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER
-        ../common/proto/anna.proto
-        ../common/proto/shared.proto
-        ../common/proto/droplet.proto
+        ${COMMON_DIR}/proto/anna.proto
+        ${COMMON_DIR}/proto/shared.proto
+        ${COMMON_DIR}/proto/droplet.proto
         )
 
 ADD_LIBRARY(anna-proto ${PROTO_HEADER} ${PROTO_SRC})
 
-FILE(GLOB_RECURSE ZMQ_UTIL_SRC ../common/include/zmq/*.cpp)
-FILE(GLOB_RECURSE ZMQ_UTIL_HEADER ../common/include/zmq/*.hpp)
+FILE(GLOB_RECURSE ZMQ_UTIL_SRC ${COMMON_DIR}/include/zmq/*.cpp)
+FILE(GLOB_RECURSE ZMQ_UTIL_HEADER ${COMMON_DIR}/include/zmq/*.hpp)
 ADD_LIBRARY(hydro-zmq STATIC ${ZMQ_UTIL_HEADER} ${ZMQ_UTIL_SRC})
 ADD_DEPENDENCIES(hydro-zmq zeromq zeromqcpp spdlog)
 
 #IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
-#    INCLUDE(../common/cmake/clang-format.cmake)
-#    INCLUDE(../common/cmake/CodeCoverage.cmake)
+#    INCLUDE(${COMMON_DIR}/cmake/clang-format.cmake)
+#    INCLUDE(${COMMON_DIR}/cmake/CodeCoverage.cmake)
 #ENDIF()
 
 LINK_DIRECTORIES(${ZEROMQ_LINK_DIRS} ${YAMLCPP_LINK_DIRS})
