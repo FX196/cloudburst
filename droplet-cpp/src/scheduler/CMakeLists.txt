@@ -15,7 +15,7 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
 SET(SCHEDULER_SOURCE
-        server.cpp
+#        server.cpp
         function_create_handler.cpp
         function_call_handler.cpp
         dag_create_handler.cpp

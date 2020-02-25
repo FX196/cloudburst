@@ -19,7 +19,7 @@
 
 // utils.py
 
-const string FUNCOBJ = 'funcs/index-allfuncs';
+const string FUNCOBJ = "funcs/index-allfuncs";
 
 const unsigned NUM_EXEC_THREADS = 3;
 
@@ -31,31 +31,31 @@ vector<string> get_func_list(KvsClient client, string prefix, bool fullname=fals
 void put_func_list(KvsClient client, vector<string> funclist);
 
 inline string get_cache_ip_key(string ip){
-    return 'ANNA_METADATA|cache_ip|' + ip;
+    return "ANNA_METADATA|cache_ip|" + ip;
 }
 
 inline string get_pin_address(string ip, unsigned tid){
-    return 'tcp://' + ip + ':' + std::to_string(PIN_PORT + tid);
+    return "tcp://" + ip + ":" + std::to_string(PIN_PORT + tid);
 }
 
 inline string get_unpin_address(string ip, unsigned tid){
-    return 'tcp://' + ip + ':' + std::to_string(UNPIN_PORT + tid);
+    return "tcp://" + ip + ":" + std::to_string(UNPIN_PORT + tid);
 }
 
 inline string get_exec_address(string ip, unsigned tid){
-    return 'tcp://' + ip + ':' + std::to_string(FUNC_EXEC_PORT + tid);
+    return "tcp://" + ip + ":" + std::to_string(FUNC_EXEC_PORT + tid);
 }
 
 inline string get_queue_address(string ip, unsigned tid){
-    return 'tcp://' + ip + ':' + std::to_string(DAG_QUEUE_PORT + tid);
+    return "tcp://" + ip + ":" + std::to_string(DAG_QUEUE_PORT + tid);
 }
 
 inline string get_scheduler_list_address(string mgmt_ip){
-    return 'tcp://' + mgmt_ip + ':' + std::to_string(SCHEDULERS_PORT);
+    return "tcp://" + mgmt_ip + ":" + std::to_string(SCHEDULERS_PORT);
 }
 
 inline string get_scheduler_update_address(string ip){
-    return 'tcp://' + ip + ':' + std::to_string(SCHED_UPDATE_PORT)
+    return "tcp://" + ip + ":" + std::to_string(SCHED_UPDATE_PORT);
 }
 
 set<string> get_ip_set(string request_ip, SocketCache socket_cache);
@@ -69,8 +69,7 @@ set<string> find_dag_source(Dag dag);
 
 // moved to scheduler_handlers.hpp: call_function
 
-GenericResponse call_dag(DagCall call, SocketCache pusher_cache,
-        map<string, pair<Dag, set<string>> dags, BaseDropletSchedulerPolicy policy);
+GenericResponse call_dag(DagCall call, SocketCache pusher_cache, map<string, pair<Dag, set<string>> dags, BaseDropletSchedulerPolicy policy);
 
 
 // create.py

@@ -16,10 +16,12 @@
 #define DROPLET_SCHEDULER_HANDLERS_HPP
 
 #include "scheduler_utils.hpp"
+#include "client/kvs_client.hpp"
 
 void connect_handler(zmq::socket_t &connect_socket, string route_addr, logger log);
 
-void function_create_handler(zmq::socket_t &func_create_socket, KvsClient *kvs, ConsistencyType consistency = NORMAL, logger log);
+void function_create_handler(zmq::socket_t &func_create_socket, KvsClient *kvs, ConsistencyType consistency = NORMAL,
+                             logger log);
 
 void function_call_handler(zmq::socket_t &func_call_socket,
                            SocketCache &pusher_cache, BaseDropletSchedulerPolicy &policy, logger log);
