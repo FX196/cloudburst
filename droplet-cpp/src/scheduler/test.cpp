@@ -4,7 +4,7 @@
 #include "common.hpp"
 
 int main(int argc, char const *argv[]) {
-    GenericResponse error;
-    std::cout << "Hello world." << std::endl;
+//    GenericResponse error;
+    std::cout << "Hello world." << kMetadataIdentifier << std::endl;
     return 0;
 }
