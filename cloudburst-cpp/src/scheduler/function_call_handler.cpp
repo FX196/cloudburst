@@ -13,6 +13,6 @@
 //  limitations under the License.
 
 void function_call_handler(zmq::socket_t &func_call_socket,
-SocketCache &pusher_cache, BaseDropletSchedulerPolicy &policy, logger log){
+SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
     // TODO: Wait for Chenggang
 }

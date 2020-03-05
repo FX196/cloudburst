@@ -14,8 +14,9 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void dag_create_handler(zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClient *kvs,
-                        map <string, pair<Dag, set < string>> &dags, BaseDropletSchedulerPolicy &policy,
-                        map<string, unsigned> &call_frequency, unsigned num_replicas = 1, logger log){
+                        map <string, pair<Dag, set < string>>> &dags, BaseSchedulerPolicy &policy,
+                        logger log
+                        map<string, unsigned> &call_frequency, unsigned num_replicas = 1){
     string serialized = kZmqUtil->recv_string(&dag_create_socket);
     Dag dag;
     dag.ParseFromString(serialized);

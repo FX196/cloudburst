@@ -70,7 +70,7 @@ set<string> find_dag_source(Dag dag);
 
 // moved to scheduler_handlers.hpp: call_function
 
-GenericResponse call_dag(DagCall call, SocketCache pusher_cache, map<string, pair<Dag, set<string>> dags, BaseDropletSchedulerPolicy policy);
+GenericResponse call_dag(DagCall call, SocketCache pusher_cache, map<string, pair<Dag, set<string>>> dags, BaseSchedulerPolicy policy);
 
 
 // create.py

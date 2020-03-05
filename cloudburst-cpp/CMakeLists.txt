@@ -72,12 +72,11 @@ INCLUDE(FindProtobuf)
 FIND_PACKAGE(Protobuf REQUIRED)
 INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
 PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER
-        ${COMMON_DIR}/proto/anna.proto
         ${COMMON_DIR}/proto/shared.proto
-        ${COMMON_DIR}/proto/droplet.proto
+        ${COMMON_DIR}/proto/cloudburst.proto
         )
 
-ADD_LIBRARY(anna-proto ${PROTO_HEADER} ${PROTO_SRC})
+ADD_LIBRARY(droplet-proto ${PROTO_HEADER} ${PROTO_SRC})
 
 FILE(GLOB_RECURSE ZMQ_UTIL_SRC ${COMMON_DIR}/include/zmq/*.cpp)
 FILE(GLOB_RECURSE ZMQ_UTIL_HEADER ${COMMON_DIR}/include/zmq/*.hpp)

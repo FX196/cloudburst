@@ -42,20 +42,20 @@ const unsigned RECV_INBOX_PORT = 5500;
 
 const unsigned STATISTICS_REPORT_PORT = 7006;
 
-// Create a generic error response protobuf.
-GenericResponse error = GenericResponse();
-error.set_success(false);
-
-// Create a generic success response protobuf.
-GenericResponse ok = GenericResponse();
-ok.set_success(true);
-
-string serialized_ok;
-ok.SerializeToString(&serialized_ok);
-
-// Create a default vector clock for keys that have no dependencies.
-VectorClock DEFAULT_VC = VectorClock();
-DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
+//// Create a generic error response protobuf.
+//GenericResponse resp;
+//resp.set_success(false);
+//
+//// Create a generic success response protobuf.
+//GenericResponse ok = GenericResponse();
+//ok.set_success(true);
+//
+//string serialized_ok;
+//ok.SerializeToString(&serialized_ok);
+//
+//// Create a default vector clock for keys that have no dependencies.
+//VectorClock DEFAULT_VC = VectorClock();
+//DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
 
 inline string get_func_kvs_name(string fname) {
     return FUNC_PREFIX + fname;
@@ -82,15 +82,7 @@ inline string get_pin_accept_port(string ip) {
     return "tcp://" + ip + ":" + std::to_string(PIN_ACCEPT_PORT);
 }
 
-vector <string> get_dag_predecessors(Dag dag, string fname) {
-    vector <string> result;
-    for (const Link &connection : dag.connections) {
-        if (fname.compare(connection.sink) == 0) {
-            result.push_back(connection.source);
-        }
-    }
-    return result;
-}
+vector <string> get_dag_predecessors(Dag dag, string fname);
 
 inline string get_user_msg_inbox_addr(string ip, string tid) {
     return "tcp://" + ip + ":" + std::to_string(std::stoi(tid) + RECV_INBOX_PORT);

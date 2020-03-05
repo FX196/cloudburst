@@ -25,12 +25,14 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
 SET(SCHEDULER_SOURCE
 #        server.cpp
-#        function_create_handler.cpp
-#        function_call_handler.cpp
-#        dag_create_handler.cpp
-#        connect_handler.cpp
-#        scheduler_utils.cpp
-#        server_utils.cpp
+        function_create_handler.cpp
+        function_call_handler.cpp
+        dag_create_handler.cpp
+        connect_handler.cpp
+        scheduler_utils.cpp
+        server_utils.cpp
         test.cpp)
 
 ADD_EXECUTABLE(scheduler ${SCHEDULER_SOURCE})
+TARGET_LINK_LIBRARIES(scheduler ${KV_LIBRARY_DEPENDENCIES})
+ADD_DEPENDENCIES(scheduler hydro-zmq zeromq zeromqcpp)

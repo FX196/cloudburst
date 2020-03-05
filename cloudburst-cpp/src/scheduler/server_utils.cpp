@@ -13,6 +13,16 @@
 //  limitations under the License.
 #include "server_utils.hpp"
 
+vector <string> get_dag_predecessors(Dag dag, string fname) {
+    vector <string> result;
+    for (const Link &connection : dag.connections) {
+        if (fname.compare(connection.sink) == 0) {
+            result.push_back(connection.source);
+        }
+    }
+    return result;
+}
+
 bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log){
     string rid = kvs->put_async(key, value, LatticeType::LWW);
     vector<KeyResponse> responses = kvs->receive_async();

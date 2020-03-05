@@ -16,8 +16,8 @@
 void function_create_handler(
         zmq::socket_t &func_create_socket,
         KvsClient *kvs,
-        ConsistencyType consistency = NORMAL,
-        logger log) {
+        logger log,
+        ConsistencyType consistency = NORMAL) {
     string serialized = kZmqUtil->recv_string(&func_create_socket);
     Function func;
     func.ParseFromString(serialized);
@@ -26,13 +26,13 @@ void function_create_handler(
     log->info("Creating function {}.", name);
 
     if (consistency == NORMAL) {
-        LWWPairLattice val = LWWPairLattice(TimestampValuePair<string>(
+        LWWPairLattice<TimestampValuePair<string>> val = LWWPairLattice<TimestampValuePair<string>>(TimestampValuePair<string>(
                 generate_timestamp(0), func.body()
         ));
     } else {
         set<string> s;
         s.insert(func.body());
-        SingleKeyCausalLattice val = SingleKeyCausalLattice(
+        SingleKeyCausalLattice<VectorClockValuePair<SetLattice<string>>> val = SingleKeyCausalLattice<VectorClockValuePair<SetLattice<string>>>(
                 VectorClockValuePair<SetLattice<string>>(DEFAULT_VC, SetLattice<string>(s)));
     }
     bool success = kvs_put(kvs, name, serialize(val), log);
