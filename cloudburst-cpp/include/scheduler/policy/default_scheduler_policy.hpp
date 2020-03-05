@@ -8,6 +8,17 @@
 #include "base_scheduler_policy.hpp"
 
 class DefaultSchedulerPolicy : public BaseSchedulerPolicy {
+private:
+    // This scheduler's IP address.
+    string ip_;
+
+    zmq::socket_t pin_accept_socket_;
+
+    SocketCache pusher_cache_;
+
+    KvsClientInterface kvs_client_;
+
+    map<pair<string, string>, > running_counts_; // TODO: type for time?
 
 };
 

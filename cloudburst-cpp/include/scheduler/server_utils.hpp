@@ -18,7 +18,7 @@
 #include "lattices/core_lattices.hpp"
 #include "client/kvs_client.hpp"
 #include "yaml-cpp/yaml.h"
-#include "droplet.pb.h"
+#include "cloudburst.pb.h"
 #include "common.hpp"
 
 using VectorClock = MapLattice <string, MaxLattice<unsigned>>;
