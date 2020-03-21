@@ -13,11 +13,10 @@
 //  limitations under the License.
 #include "scheduler/scheduler_handlers.hpp"
 
-void dag_create_handler(zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClient *kvs,
+void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClient *kvs,
                         map <string, pair<Dag, set < string>>> &dags, BaseSchedulerPolicy &policy,
-                        logger log
+                        logger log,
                         map<string, unsigned> &call_frequency, unsigned num_replicas = 1){
-    string serialized = kZmqUtil->recv_string(&dag_create_socket);
     Dag dag;
     dag.ParseFromString(serialized);
 
@@ -28,15 +27,15 @@ void dag_create_handler(zmq::socket_t &dag_create_socket, SocketCache &pusher_ca
         error.set_error(DAG_ALREADY_EXISTS);
         string serialized;
         error.SerializeToString(&serialized);
-        kZmqUtil->send_string(serialized, &dag_create_socket);
-        return
+//        kZmqUtil->send_string(serialized, &dag_create_socket);
+        return;
     }
 
-    log->info("Creating DAG %s." % (dag.name()));
+    log->info("Creating DAG {}.", (dag.name()));
 
     // We persist the DAG in the KVS, so other schedulers can read the DAG when they hear about it.
-    LWWPairLattice payload(generate_timestamp(0), serialized);
-    kvs_put(kvs, dag.name(), serialize(payload));
+    LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
+    kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
 
     for(auto fname: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {

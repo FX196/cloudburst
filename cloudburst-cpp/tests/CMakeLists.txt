@@ -14,16 +14,12 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
-SET(KV_LIBRARY_DEPENDENCIES
-        protobuf::libprotobuf
-        cloudburst-proto
-        pthread
-        zmq
-        hydro-zmq
-        yaml-cpp
-        )
-
-
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/target/scheduler)
+SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/tests)
 
 ADD_SUBDIRECTORY(scheduler)
+
+ADD_CUSTOM_TARGET(ctest ${CMAKE_CTEST_COMMAND})
+
+#IF(${CMAKE_BUILD_TYPE} STREQUAL "Debug")
+#    SETUP_TARGET_FOR_COVERAGE(test-coverage ctest coverage)
+#ENDIF()

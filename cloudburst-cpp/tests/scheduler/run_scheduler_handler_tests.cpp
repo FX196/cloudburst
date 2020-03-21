@@ -12,8 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "scheduler/scheduler_handlers.hpp"
+#include <stdlib.h>
+#include <vector>
 
-void connect_handler(string serialized, zmq::socket_t &connect_socket, string route_addr, logger log){
-    kZmqUtil->send_string(route_addr, &connect_socket);
+#include "gmock/gmock.h"
+#include "gtest/gtest.h"
+
+#include "anna.pb.h"
+#include "cloudburst.pb.h"
+
+
+#include "scheduler_handler_base.hpp"
+#include "test_connect_handler.hpp"
+
+int main(int argc, char *argv[]) {
+    log_->set_level(spdlog::level::info);
+    testing::InitGoogleTest(&argc, argv);
+    return RUN_ALL_TESTS();
 }

@@ -11,21 +11,14 @@
 //  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
+
+#ifndef PROJECT_TEST_CONNECT_HANDLER_HPP
+#define PROJECT_TEST_CONNECT_HANDLER_HPP
+
 #include "scheduler/scheduler_handlers.hpp"
 
-void function_call_handler(string serialized, zmq::socket_t &func_call_socket,
-SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
-//    FunctionCall call;
-//    string serialized = kZmqUtil->recv_string(&func_call_socket);
-//    call.ParseFromString(serialized);
-//
-//    if (call.response_key() == ""){ //TODO: empty response key value?
-//        call.set_response_key(""); // Generate random response key
-//    }
-//
-//    vector<string> refs = call.references();
-//    pair<string, unsigned> result = policy.pick_executor(refs);
-//
-//    GenericResponse response;
-//    if
+TEST_F(SchedulerHandlerTest, ConnectReceive){
+
 }
+
+#endif //PROJECT_TEST_CONNECT_HANDLER_HPP

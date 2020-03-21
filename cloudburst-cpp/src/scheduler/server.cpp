@@ -20,6 +20,9 @@ const unsigned REPORT_THRESHOLD = 5;
 
 void run_scheduler(string ip, string mgmt_ip, string rout_addr){
 
+    ZmqUtil zmq_util;
+    ZmqUtilInterface *kZmqUtil = &zmq_util;
+
     // set up logging
     string log_file = "log_" + std::to_string(ip) + ".txt";
     string log_name = "scheduler_log_" + std::to_string(ip);

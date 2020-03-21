@@ -18,7 +18,13 @@ private:
 
     KvsClientInterface kvs_client_;
 
-    map<pair<string, string>, > running_counts_; // TODO: type for time?
+    map<pair<string, string>, std::chrono::time_point> running_counts_;
+
+    map<pair<string, string>, std::chrono::time_point> backoff_;
+
+    map<string, set<string>> key_locations_;
+
+    set<pair<string, string>> unpinned_executors_;
 
 };
 

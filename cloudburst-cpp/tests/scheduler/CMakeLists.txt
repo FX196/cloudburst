@@ -14,16 +14,15 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
-SET(KV_LIBRARY_DEPENDENCIES
-        protobuf::libprotobuf
-        cloudburst-proto
-        pthread
-        zmq
-        hydro-zmq
-        yaml-cpp
-        )
+FILE(GLOB HANDLER_SOURCES "${CMAKE_SOURCE_DIR}/src/scheduler/*handler.cpp")
 
+ADD_EXECUTABLE(run_scheduler_handler_tests
+        run_scheduler_handler_tests.cpp
+        ${CMAKE_SOURCE_DIR}/src/scheduler/connect_handler.cpp
+        ${CMAKE_SOURCE_DIR}/src/scheduler/server_utils.cpp
+        ${CMAKE_SOURCE_DIR}/src/scheduler/scheduler_utils.cpp)
 
-SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/target/scheduler)
+TARGET_LINK_LIBRARIES(run_scheduler_handler_tests gtest gmock zmq hydro-zmq-mock)
+ADD_DEPENDENCIES(run_scheduler_handler_tests gtest)
 
-ADD_SUBDIRECTORY(scheduler)
+ADD_TEST(NAME SchedulerTests COMMAND run_scheduler_handler_tests)

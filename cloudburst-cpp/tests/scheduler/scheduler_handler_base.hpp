@@ -12,8 +12,21 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "scheduler/scheduler_handlers.hpp"
+#ifndef PROJECT_SCHEDULER_HANDLER_BASE_HPP
+#define PROJECT_SCHEDULER_HANDLER_BASE_HPP
 
-void connect_handler(string serialized, zmq::socket_t &connect_socket, string route_addr, logger log){
-    kZmqUtil->send_string(route_addr, &connect_socket);
-}
+#include "mock_zmq_utils.hpp"
+#include "scheduler/policy/mock_scheduler_policy.hpp"
+
+MockZmqUtil mock_zmq_util;
+ZmqUtilInterface *kZmqUtil = &mock_zmq_util;
+
+MockSchedulerPolicy policy;
+
+logger log_ = spdlog::basic_logger_mt("mock_log", "mock_log.txt", true);
+
+class SchedulerHandlerTest : public ::testing::Test {
+    // initialization
+};
+
+#endif //PROJECT_SCHEDULER_HANDLER_BASE_HPP

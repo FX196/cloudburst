@@ -74,9 +74,11 @@ INCLUDE_DIRECTORIES(${PROTOBUF_INCLUDE_DIR})
 PROTOBUF_GENERATE_CPP(PROTO_SRC PROTO_HEADER
         ${COMMON_DIR}/proto/shared.proto
         ${COMMON_DIR}/proto/cloudburst.proto
+        ${COMMON_DIR}/proto/anna.proto
+        ../proto/internal.proto
         )
 
-ADD_LIBRARY(droplet-proto ${PROTO_HEADER} ${PROTO_SRC})
+ADD_LIBRARY(cloudburst-proto ${PROTO_HEADER} ${PROTO_SRC})
 
 FILE(GLOB_RECURSE ZMQ_UTIL_SRC ${COMMON_DIR}/include/zmq/*.cpp)
 FILE(GLOB_RECURSE ZMQ_UTIL_HEADER ${COMMON_DIR}/include/zmq/*.hpp)
@@ -91,3 +93,19 @@ ADD_DEPENDENCIES(hydro-zmq zeromq zeromqcpp spdlog)
 LINK_DIRECTORIES(${ZEROMQ_LINK_DIRS} ${YAMLCPP_LINK_DIRS})
 
 ADD_SUBDIRECTORY(src)
+
+IF(${BUILD_TEST})
+    INCLUDE(${COMMON_DIR}/cmake/DownloadProject.cmake)
+    DOWNLOAD_PROJECT(PROJ                googletest
+            GIT_REPOSITORY      https://github.com/google/googletest.git
+            GIT_TAG             release-1.8.0
+            UPDATE_DISCONNECTED 1
+            )
+
+    ADD_SUBDIRECTORY(${googletest_SOURCE_DIR} ${googletest_BINARY_DIR})
+
+    INCLUDE_DIRECTORIES(${COMMON_DIR}/mock common/mock)
+    INCLUDE_DIRECTORIES(tests)
+    ADD_SUBDIRECTORY(${COMMON_DIR}/mock common/mock)
+    ADD_SUBDIRECTORY(tests)
+ENDIF()

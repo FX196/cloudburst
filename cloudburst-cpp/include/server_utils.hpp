@@ -17,14 +17,15 @@
 
 #include "lattices/core_lattices.hpp"
 #include "client/kvs_client.hpp"
-#include "yaml-cpp/yaml.h"
 #include "cloudburst.pb.h"
 #include "common.hpp"
 
-using VectorClock = MapLattice <string, MaxLattice<unsigned>>;
+using VectorClock = MapLattice<string, MaxLattice<unsigned>>;
 
 const string FUNC_PREFIX = "funcs/";
 const string BIND_ADDR_TEMPLATE = "tcp://*:%d";
+
+const string FUNCOBJ = "funcs/index-allfuncs";
 
 const unsigned PIN_PORT = 4000;
 const unsigned UNPIN_PORT = 4010;
@@ -88,14 +89,13 @@ inline string get_user_msg_inbox_addr(string ip, string tid) {
     return "tcp://" + ip + ":" + std::to_string(std::stoi(tid) + RECV_INBOX_PORT);
 }
 
+bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log, LatticeType type);
 
-YAML::Node load_conf(string filename){
-    return YAML::LoadFile(filename);
-}
+string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type); // TODO: how to return generic lattice?
 
-bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log);
+vector<string> get_func_list(KvsClientInterface *kvs, string prefix, logger log, bool fullname=true);
 
-string kvs_get(KvsClientInterface *kvs, string key, logger log);
+void put_func_list(KvsClientInterface *kvs, vector<string> funclist, logger log);
 
 // generate_timestamp implemented in common.hpp
 

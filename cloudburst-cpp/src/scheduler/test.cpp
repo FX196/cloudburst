@@ -1,7 +1,8 @@
 #include <iostream>
 
-#include "droplet.pb.h"
-#include "common.hpp"
+#include "scheduler/scheduler_handlers.hpp"
+ZmqUtil zmq_util;
+ZmqUtilInterface *kZmqUtil = &zmq_util;
 
 int main(int argc, char const *argv[]) {
     GenericResponse error;

@@ -15,20 +15,19 @@
 #ifndef DROPLET_SCHEDULER_UTILS_HPP
 #define DROPLET_SCHEDULER_UTILS_HPP
 
-#include "server_utils.hpp"
+#include "../server_utils.hpp"
+#include "policy/base_scheduler_policy.hpp"
 
 // utils.py
-
-const string FUNCOBJ = "funcs/index-allfuncs";
 
 const unsigned NUM_EXEC_THREADS = 3;
 
 const unsigned EXECUTORS_PORT = 7002;
 const unsigned SCHEDULERS_PORT = 7004;
 
-vector<string> get_func_list(KvsClient client, string prefix, bool fullname=false);
-
-void put_func_list(KvsClient client, vector<string> funclist);
+//vector<string> get_func_list(KvsClient client, string prefix, bool fullname=false);
+//
+//void put_func_list(KvsClient client, vector<string> funclist);
 
 inline string get_cache_ip_key(string ip){
     return "ANNA_METADATA|cache_ip|" + ip;
@@ -65,11 +64,13 @@ set<string> get_ip_set(string request_ip, SocketCache socket_cache);
 
 set<string> find_dag_source(Dag dag);
 
+VectorClock get_default_vc();
+
 // call.py
 
-// moved to scheduler_handlers.hpp: call_function
+// moved to scheduler_handlers.hpp: call_function, call_dag
 
-GenericResponse call_dag(DagCall call, SocketCache pusher_cache, map<string, pair<Dag, set<string>>> dags, BaseSchedulerPolicy policy);
+//GenericResponse call_dag(DagCall call, SocketCache pusher_cache, map<string, pair<Dag, set<string>>> dags, BaseSchedulerPolicy &policy);
 
 
 // create.py

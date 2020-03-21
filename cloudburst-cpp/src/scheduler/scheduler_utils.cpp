@@ -12,3 +12,36 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
+#include "scheduler/scheduler_utils.hpp"
+
+//VectorClock DEFAULT_VC = VectorClock();
+//DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
+
+//set<string> get_ip_set(string request_ip, SocketCache socket_cache){
+//
+//}
+// Note: there is an additional bool argument `exec_threads` in the Python version,
+// but this function is never called with exec_threads=True, so only the case with
+// exec_threads=False is implemented
+
+set<string> find_dag_source(Dag dag){
+    set<string> sinks;
+    for(const auto& conn : dag.connections()){
+        sinks.insert(conn.sink());
+    }
+
+    set<string> funcs;
+    for(const auto& func : dag.functions()){
+        if(sinks.find(func) != sinks.end()){
+            funcs.insert(func);
+        }
+    }
+
+    return funcs;
+}
+
+VectorClock get_default_vc(){
+    VectorClock DEFAULT_VC = VectorClock();
+    DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
+    return DEFAULT_VC;
+}
