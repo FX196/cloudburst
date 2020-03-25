@@ -22,7 +22,7 @@ ADD_EXECUTABLE(run_scheduler_handler_tests
         ${CMAKE_SOURCE_DIR}/src/scheduler/server_utils.cpp
         ${CMAKE_SOURCE_DIR}/src/scheduler/scheduler_utils.cpp)
 
-TARGET_LINK_LIBRARIES(run_scheduler_handler_tests gtest gmock zmq hydro-zmq-mock)
+TARGET_LINK_LIBRARIES(run_scheduler_handler_tests gtest gmock zmq hydro-zmq-mock protobuf::libprotobuf cloudburst-proto)
 ADD_DEPENDENCIES(run_scheduler_handler_tests gtest)
 
 ADD_TEST(NAME SchedulerTests COMMAND run_scheduler_handler_tests)

@@ -27,6 +27,10 @@ logger log_ = spdlog::basic_logger_mt("mock_log", "mock_log.txt", true);
 
 class SchedulerHandlerTest : public ::testing::Test {
     // initialization
+protected:
+    zmq::context_t context;
+public:
+    vector<string> get_zmq_messages() { return mock_zmq_util.sent_messages; }
 };
 
 #endif //PROJECT_SCHEDULER_HANDLER_BASE_HPP

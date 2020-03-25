@@ -18,7 +18,18 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 TEST_F(SchedulerHandlerTest, ConnectReceive){
+vector<string> messages = get_zmq_messages();
+EXPECT_EQ(messages.size(), 0);
 
+string serialized = "";
+zmq::socket_t connect_socket(context, ZMQ_REP);
+string route_addr = "route_addr";
+
+connect_handler(serialized, connect_socket, route_addr, log_);
+
+messages = get_zmq_messages();
+EXPECT_EQ(messages.size(), 1);
+EXPECT_EQ(messages[0], "route_addr");
 }
 
 #endif //PROJECT_TEST_CONNECT_HANDLER_HPP
