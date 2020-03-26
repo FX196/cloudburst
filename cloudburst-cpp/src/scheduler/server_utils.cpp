@@ -104,7 +104,7 @@ string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type
     return responses[0].tuples(0).payload();
 }
 
-vector <string> get_func_list(KvsClientInterface *kvs, string prefix, logger log, bool fullname) { // TODO: default argument
+vector <string> get_func_list(KvsClientInterface *kvs, string prefix, logger log, bool fullname) {
     string serialized = kvs_get(kvs, FUNCOBJ, log, LatticeType::SET);
     SetLattice <string> funcobj = deserialize_set(serialized);
     set <string> funcs = funcobj.reveal();

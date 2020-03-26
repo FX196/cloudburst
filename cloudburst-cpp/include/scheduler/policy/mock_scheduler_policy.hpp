@@ -9,8 +9,10 @@
 
 class MockSchedulerPolicy : public BaseSchedulerPolicy {
 public:
-    pair<string, unsigned> pick_executor(vector<string> refs, string function_name = ""){
-        return pair<string, unsigned>("", 0);
+    pair<Address, unsigned> pick_executor(vector<string> refs, string function_name = ""){
+        pair<Address, unsigned> response = pick_executor_responses_[0];
+        pick_executor_responses_.erase(pick_executor_responses_.begin());
+        return response;
     }
 
     bool pin_function(string dag_name, string function_name){
@@ -37,6 +39,8 @@ public:
     void update_function_locations(const vector<SchedulerStatus::FunctionLocation>& new_locations){
 
     }
+
+    vector<pair<Address, unsigned>> pick_executor_responses_;
 
 };
 

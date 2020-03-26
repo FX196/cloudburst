@@ -15,9 +15,9 @@
 
 void function_create_handler(string serialized,
         zmq::socket_t &func_create_socket,
-        KvsClient *kvs,
+        KvsClientInterface *kvs,
         logger log,
-        ConsistencyType consistency = NORMAL) {
+        ConsistencyType consistency) {
     Function func;
     func.ParseFromString(serialized);
 
@@ -45,7 +45,7 @@ void function_create_handler(string serialized,
         log->error("Function Body PUT Errored!");
     }
     vector<string> funcs = get_func_list(kvs, "", log, true);
-    funcs.push_back(name);
+    funcs.push_back(FUNC_PREFIX+name);
     put_func_list(kvs, funcs, log);
 
     GenericResponse ok = GenericResponse();
@@ -54,5 +54,5 @@ void function_create_handler(string serialized,
     string serialized_ok;
     ok.SerializeToString(&serialized_ok);
 
-//    kZmqUtil->send_string(serialized_ok, &func_create_socket);
+    kZmqUtil->send_string(serialized_ok, &func_create_socket);
 }

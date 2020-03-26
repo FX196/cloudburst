@@ -15,17 +15,35 @@
 
 void function_call_handler(string serialized, zmq::socket_t &func_call_socket,
 SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
-//    FunctionCall call;
-//    string serialized = kZmqUtil->recv_string(&func_call_socket);
-//    call.ParseFromString(serialized);
-//
-//    if (call.response_key() == ""){ //TODO: empty response key value?
-//        call.set_response_key(""); // Generate random response key
-//    }
-//
-//    vector<string> refs = call.references();
-//    pair<string, unsigned> result = policy.pick_executor(refs);
-//
-//    GenericResponse response;
-//    if
+    FunctionCall call;
+    call.ParseFromString(serialized);
+
+    if (call.response_key() == ""){ //TODO: empty response key value?
+        call.set_response_key(""); // Generate random response key
+    }
+
+    // pick a node for this request.
+    vector<string> refs = call.references();
+    pair<Address, unsigned> result = policy.pick_executor(refs);
+
+    GenericResponse response;
+    if (result.first().equals("")){
+        response.set_success(false);
+        response.set_error(CloudburstError::NO_RESOURCES);
+        string serialized_response;
+        response.SerializeToString(&serialized_response);
+        kZmqUtil->send_string(serialized_response, &func_call_socket);
+        return
+    }
+
+    // Forward the request on to the chosen executor node.
+    Address ip = result.first();
+    unsigned tid = result.second();
+    kZmqUtil->send_string(serialized, &pusher_cache[ip]);
+
+    response.set_success(true);
+    response.set_response_id(call.response_key());
+    string serialized_response;
+    response.SerializeToString(&serialized_response);
+    kZmqUtil->send_string(serialized_response, &func_call_socket);
 }

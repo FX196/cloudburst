@@ -13,7 +13,7 @@
 //  limitations under the License.
 #include "scheduler/scheduler_handlers.hpp"
 
-void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClient *kvs,
+void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClientInterface *kvs,
                         map <string, pair<Dag, set < string>>> &dags, BaseSchedulerPolicy &policy,
                         logger log,
                         map<string, unsigned> &call_frequency, unsigned num_replicas = 1){
