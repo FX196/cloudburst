@@ -25,6 +25,7 @@
 #include "scheduler_handler_base.hpp"
 #include "test_connect_handler.hpp"
 #include "test_function_create_handler.hpp"
+#include "test_function_call_handler.hpp"
 
 int main(int argc, char *argv[]) {
     log_->set_level(spdlog::level::info);

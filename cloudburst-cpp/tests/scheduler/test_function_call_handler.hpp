@@ -17,31 +17,51 @@
 
 #include "scheduler/scheduler_handlers.hpp"
 
-TEST_F(SchedulerHandlerTest, FunctionCreateFail){
-Function func;
-func.set_name("foo");
-func.set_body("foo body");
-string serialized;
-func.SerializeToString(&serialized);
+TEST_F(SchedulerHandlerTest, FunctionCallSuccess){
+FunctionCall call;
+call.set_name("foo");
+string serialized_call;
+call.SerializeToString(&serialized_call);
 
-((KvsMockClient *) kvs_mock)->responses_.push_back(get_func_list_response());
+mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("tcp://127.0.0.1:6000", 0));
 
-zmq::socket_t create_socket(context, ZMQ_REP);
 
-function_create_handler(serialized, create_socket, kvs_mock, log_);
+zmq::socket_t func_call_socket(context, ZMQ_REP);
 
-EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_get_.size(), 1);
-EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_get_[0], FUNCOBJ);
-EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_put_.size(), 2);
-EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_put_[0], FUNC_PREFIX + "foo");
-EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_put_[1], FUNCOBJ);
+function_call_handler(serialized_call, func_call_socket, pusher_cache, mock_policy, log_);
+
+vector<string> messages = get_zmq_messages();
+EXPECT_EQ(messages.size(), 2);
+
+FunctionCall received_call;
+received_call.ParseFromString(messages[0]);
+EXPECT_NE(received_call.response_key(), "");
+
+GenericResponse response;
+response.ParseFromString(messages[1]);
+EXPECT_EQ(response.success(), true);
+EXPECT_EQ(response.response_id(), received_call.response_key());
+}
+
+TEST_F(SchedulerHandlerTest, FunctionCallFail){
+FunctionCall call;
+call.set_name("foo");
+string serialized_call;
+call.SerializeToString(&serialized_call);
+
+mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("", 0));
+
+
+zmq::socket_t func_call_socket(context, ZMQ_REP);
+
+function_call_handler(serialized_call, func_call_socket, pusher_cache, mock_policy, log_);
 
 vector<string> messages = get_zmq_messages();
 EXPECT_EQ(messages.size(), 1);
-string serialized_ok = messages[0];
-GenericResponse ok;
-ok.ParseFromString(serialized_ok);
-EXPECT_EQ(ok.success(), true);
+
+GenericResponse response;
+response.ParseFromString(messages[0]);
+EXPECT_EQ(response.success(), false);
 }
 
 #endif //PROJECT_TEST_FUNCTION_CALL_HANDLER_HPP

@@ -34,12 +34,13 @@ class SchedulerHandlerTest : public ::testing::Test {
     // initialization
 protected:
     zmq::context_t context;
-    SocketCache pushers = SocketCache(&context, ZMQ_PUSH);
+    SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
 public:
     void TearDown() {
         // clear all the logged messages after each test
         mock_zmq_util.sent_messages.clear();
-        kvs_mock_client.responses_.clear();
+        kvs_mock_client.clear();
+        mock_policy.pick_executor_responses_.clear();
     }
 
     vector<string> get_zmq_messages() { return mock_zmq_util.sent_messages;}

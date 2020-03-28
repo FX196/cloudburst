@@ -18,28 +18,32 @@ SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
     FunctionCall call;
     call.ParseFromString(serialized);
 
-    if (call.response_key() == ""){ //TODO: empty response key value?
-        call.set_response_key(""); // Generate random response key
+    if (call.response_key().empty()){
+        call.set_response_key(get_random_response_key());
     }
 
+
+
     // pick a node for this request.
-    vector<string> refs = call.references();
-    pair<Address, unsigned> result = policy.pick_executor(refs);
+    pair<Address, unsigned> result = policy.pick_executor(call);
 
     GenericResponse response;
-    if (result.first().equals("")){
+    if (result.first == ""){
         response.set_success(false);
         response.set_error(CloudburstError::NO_RESOURCES);
         string serialized_response;
         response.SerializeToString(&serialized_response);
         kZmqUtil->send_string(serialized_response, &func_call_socket);
-        return
+        return;
     }
 
     // Forward the request on to the chosen executor node.
-    Address ip = result.first();
-    unsigned tid = result.second();
-    kZmqUtil->send_string(serialized, &pusher_cache[ip]);
+    Address ip = result.first;
+    unsigned tid = result.second;
+    string serialized_send;
+    call.SerializeToString(&serialized_send);
+    kZmqUtil->send_string(serialized_send, &pusher_cache[ip]);
+
 
     response.set_success(true);
     response.set_response_id(call.response_key());

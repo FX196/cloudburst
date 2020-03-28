@@ -9,15 +9,16 @@
 
 class MockSchedulerPolicy : public BaseSchedulerPolicy {
 public:
-    pair<Address, unsigned> pick_executor(vector<string> refs, string function_name = ""){
+    pair<Address, unsigned> pick_executor(FunctionCall call, string function_name = ""){
         pair<Address, unsigned> response = pick_executor_responses_[0];
         pick_executor_responses_.erase(pick_executor_responses_.begin());
         return response;
     }
 
     bool pin_function(string dag_name, string function_name){
-        std::cout << "Pinning function " << function_name << " of Dag" << dag_name << std::endl;
-        return false;
+        bool response = pick_executor_responses_[0];
+        pin_function_responses_.erase(pin_function_responses_.begin());
+        return response;
     }
 
     void commit_dag(string dag_name){
@@ -41,6 +42,7 @@ public:
     }
 
     vector<pair<Address, unsigned>> pick_executor_responses_;
+    vector<bool> pin_function_responses_;
 
 };
 

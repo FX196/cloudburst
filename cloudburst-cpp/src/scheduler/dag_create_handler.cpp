@@ -14,7 +14,7 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClientInterface *kvs,
-                        map <string, pair<Dag, set < string>>> &dags, BaseSchedulerPolicy &policy,
+                        map <string, pair<Dag, set<string>>> &dags, BaseSchedulerPolicy &policy,
                         logger log,
                         map<string, unsigned> &call_frequency, unsigned num_replicas = 1){
     Dag dag;
@@ -24,10 +24,10 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     if(dags.find(dag.name()) != dags.end()){
         GenericResponse error;
         error.set_success(false);
-        error.set_error(DAG_ALREADY_EXISTS);
+        error.set_error(CloudburstError::DAG_ALREADY_EXISTS);
         string serialized;
         error.SerializeToString(&serialized);
-//        kZmqUtil->send_string(serialized, &dag_create_socket);
+        kZmqUtil->send_string(serialized, &dag_create_socket);
         return;
     }
 
@@ -36,11 +36,43 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     // We persist the DAG in the KVS, so other schedulers can read the DAG when they hear about it.
     LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
     kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
+    // TODO: should this be after pinning also?
 
+    // try to pin all functions in the dag
     for(auto fname: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {
-            // TODO: policy pin function
+            // policy will return false if there are no executors to pin this function
+            if(!(policy.pin_function(dag.name, fname))){
+                log->info("Creating DAG %s failed due to insufficient resources", dag.name);
+                GenericResponse error;
+                error.set_success(false);
+                error.set_error(CloudburstError::NO_RESOURCES);
+                string serialized;
+                error.SerializeToString(&serialized);
+                kZmqUtil->send_string(serialized, &dag_create_socket);
+
+                // unpin all previously pinned functions
+                policy.discard_dag(dag, true);
+                return;
+            }
         }
     }
+
+    for(auto fname: dag.functions()){
+        if(call_frequency.find(fname) == call_frequency.end()){
+            call_frequency.insert(pair<string, unsigned>(fname, 0));
+        }
+    }
+
+    // Only create this metadata after all functions have been successfully created
+    policy.commit_dag(dag.name());
+    pair<Dag, set<string>> dag_sources_pair(dag, find_dag_source(dag));
+    dags.insert(pair<string, pair<Dag, set<string>>>(dag.name, dag_sources_pair));
+
+    // Send ok response
+    response.set_success(true);
+    string serialized_response;
+    response.SerializeToString(&serialized_response);
+    kZmqUtil->send_string(serialized_response, &func_call_socket);
 
 }

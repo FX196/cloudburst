@@ -97,6 +97,8 @@ vector<string> get_func_list(KvsClientInterface *kvs, string prefix, logger log,
 
 void put_func_list(KvsClientInterface *kvs, vector<string> funclist, logger log);
 
+string get_random_response_key(size_t length=16);
+
 // generate_timestamp implemented in common.hpp
 
 #endif //DROPLET_SERVER_UTILS_HPP
