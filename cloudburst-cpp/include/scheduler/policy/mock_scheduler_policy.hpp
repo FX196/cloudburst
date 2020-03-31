@@ -16,7 +16,7 @@ public:
     }
 
     bool pin_function(string dag_name, string function_name){
-        bool response = pick_executor_responses_[0];
+        bool response = pin_function_responses_[0];
         pin_function_responses_.erase(pin_function_responses_.begin());
         return response;
     }
@@ -39,6 +39,11 @@ public:
 
     void update_function_locations(const vector<SchedulerStatus::FunctionLocation>& new_locations){
 
+    }
+
+    void clear(){
+        pick_executor_responses_.clear();
+        pin_function_responses_.clear();
     }
 
     vector<pair<Address, unsigned>> pick_executor_responses_;

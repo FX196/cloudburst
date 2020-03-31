@@ -21,6 +21,7 @@ ADD_EXECUTABLE(run_scheduler_handler_tests
         ${CMAKE_SOURCE_DIR}/src/scheduler/connect_handler.cpp
         ${CMAKE_SOURCE_DIR}/src/scheduler/function_create_handler.cpp
         ${CMAKE_SOURCE_DIR}/src/scheduler/function_call_handler.cpp
+        ${CMAKE_SOURCE_DIR}/src/scheduler/dag_create_handler.cpp
         ${CMAKE_SOURCE_DIR}/src/scheduler/server_utils.cpp
         ${CMAKE_SOURCE_DIR}/src/scheduler/scheduler_utils.cpp)
 

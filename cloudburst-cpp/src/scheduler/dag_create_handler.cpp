@@ -15,8 +15,7 @@
 
 void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClientInterface *kvs,
                         map <string, pair<Dag, set<string>>> &dags, BaseSchedulerPolicy &policy,
-                        logger log,
-                        map<string, unsigned> &call_frequency, unsigned num_replicas = 1){
+                        map<string, unsigned> &call_frequency, logger log, unsigned num_replicas){
     Dag dag;
     dag.ParseFromString(serialized);
 
@@ -42,8 +41,8 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     for(auto fname: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {
             // policy will return false if there are no executors to pin this function
-            if(!(policy.pin_function(dag.name, fname))){
-                log->info("Creating DAG %s failed due to insufficient resources", dag.name);
+            if(!(policy.pin_function(dag.name(), fname))){
+                log->info("Creating DAG %s failed due to insufficient resources", dag.name());
                 GenericResponse error;
                 error.set_success(false);
                 error.set_error(CloudburstError::NO_RESOURCES);
@@ -67,12 +66,12 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     // Only create this metadata after all functions have been successfully created
     policy.commit_dag(dag.name());
     pair<Dag, set<string>> dag_sources_pair(dag, find_dag_source(dag));
-    dags.insert(pair<string, pair<Dag, set<string>>>(dag.name, dag_sources_pair));
+    dags.insert(pair<string, pair<Dag, set<string>>>(dag.name(), dag_sources_pair));
 
     // Send ok response
+    GenericResponse response;
     response.set_success(true);
     string serialized_response;
     response.SerializeToString(&serialized_response);
-    kZmqUtil->send_string(serialized_response, &func_call_socket);
-
+    kZmqUtil->send_string(serialized_response, &dag_create_socket);
 }

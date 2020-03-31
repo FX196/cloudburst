@@ -35,6 +35,8 @@ class SchedulerHandlerTest : public ::testing::Test {
 protected:
     zmq::context_t context;
     SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
+    map <string, pair<Dag, set<string>>> dags;
+    map<string, unsigned> call_frequency;
 public:
     void TearDown() {
         // clear all the logged messages after each test
@@ -60,6 +62,14 @@ public:
         SetLattice<string> func_lattice(funcs);
 
         tp->set_payload(serialize(func_lattice));
+        return response;
+    }
+
+    KeyResponse get_put_ok_response(unsigned rid){
+        KeyResponse response;
+        response.set_response_id(std::to_string(rid));
+        KeyTuple *tp = response.add_tuples();
+        tp->set_error(AnnaError::NO_ERROR);
         return response;
     }
 };
