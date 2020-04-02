@@ -70,7 +70,8 @@ void dag_call_handler(string serialized,
     // actuall call the dag
     DagSchedule schedule;
     schedule.set_id(get_random_response_key());
-    schedule.set_allocated_dag(&dag); // TODO: CopyFrom? Why no set_dag?
+    auto* dag_ptr = schedule.mutable_dag();
+    *dag_ptr = dag;
     schedule.set_start_time(start_time);
     schedule.set_consistency(call.consistency());
     

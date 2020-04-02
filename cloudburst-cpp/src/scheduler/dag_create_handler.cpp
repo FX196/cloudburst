@@ -32,11 +32,6 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
 
     log->info("Creating DAG {}.", (dag.name()));
 
-    // We persist the DAG in the KVS, so other schedulers can read the DAG when they hear about it.
-    LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
-    kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
-    // TODO: should this be after pinning also?
-
     // try to pin all functions in the dag
     for(auto fname: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {
@@ -56,6 +51,10 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
             }
         }
     }
+
+    // We persist the DAG in the KVS, so other schedulers can read the DAG when they hear about it.
+    LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
+    kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
 
     for(auto fname: dag.functions()){
         if(call_frequency.find(fname) == call_frequency.end()){

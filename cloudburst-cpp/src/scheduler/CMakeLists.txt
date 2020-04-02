@@ -29,7 +29,7 @@ SET(SCHEDULER_SOURCE
         function_create_handler.cpp
         function_call_handler.cpp
         dag_create_handler.cpp
-#        dag_call_handler.cpp
+        dag_call_handler.cpp
         dag_delete_handler.cpp
         connect_handler.cpp
         list_handler.cpp
