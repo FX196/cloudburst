@@ -61,6 +61,8 @@ mock_policy.pin_function_responses_.push_back(true);
 zmq::socket_t dag_create_socket(context, ZMQ_REP);
 
 dag_create_handler(serialized, dag_create_socket, pusher_cache, kvs_mock, dags, mock_policy, call_frequency, log_);
+
+
 }
 
 #endif //PROJECT_TEST_DAG_CREATE_HANDLER_HPP

@@ -38,14 +38,14 @@ void dag_create_handler(string serialized,
 void dag_call_handler(string serialized,
         zmq::socket_t &dag_call_socket,
         SocketCache &pusher_cache,
-        map<string, unsigned> &last_arrivals,
-        map<string, unsigned> &interarrivals,
+        map<string, TimePoint> &last_arrivals,
+        map<string, unsigned long long> &interarrivals,
         map<string, pair<Dag, set <string>>> &dags,
         BaseSchedulerPolicy &policy,
         map<string, unsigned> &call_frequency,
         logger log);
 
-void dag_delete_handler(string serialized, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set < string>>> &dags,
+void dag_delete_handler(string dag_name, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set < string>>> &dags,
                         BaseSchedulerPolicy &policy, map<string, unsigned> &call_frequency, logger log);
 
 void list_handler(string serialized, zmq::socket_t &list_socket, KvsClientInterface *kvs, logger log);

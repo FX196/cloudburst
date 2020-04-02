@@ -9,7 +9,7 @@
 
 class MockSchedulerPolicy : public BaseSchedulerPolicy {
 public:
-    pair<Address, unsigned> pick_executor(FunctionCall call, string function_name = ""){
+    pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = ""){
         pair<Address, unsigned> response = pick_executor_responses_[0];
         pick_executor_responses_.erase(pick_executor_responses_.begin());
         return response;
@@ -25,7 +25,7 @@ public:
         std::cout << "Committing Dag " << dag_name << std::endl;
     }
 
-    void discard_dag(Dag dag, bool pending=false){
+    void discard_dag(const Dag& dag, bool pending=false){
         std::cout << "Discarding Dag " << dag.name() << std::endl;
     }
 

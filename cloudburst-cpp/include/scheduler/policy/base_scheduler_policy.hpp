@@ -11,13 +11,13 @@
 
 class BaseSchedulerPolicy {
 public:
-    virtual pair<Address, unsigned> pick_executor(FunctionCall call, string function_name = "") = 0;
+    virtual pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = "") = 0;
 
     virtual bool pin_function(string dag_name, string function_name) = 0;
 
     virtual void commit_dag(string dag_name) = 0;
 
-    virtual void discard_dag(Dag dag, bool pending=false) = 0;
+    virtual void discard_dag(const Dag& dag, bool pending=false) = 0;
 
     virtual void process_status(const ThreadStatus& status) = 0;
 

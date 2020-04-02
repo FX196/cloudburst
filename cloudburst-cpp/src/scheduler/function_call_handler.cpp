@@ -25,7 +25,11 @@ SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
 
 
     // pick a node for this request.
-    pair<Address, unsigned> result = policy.pick_executor(call);
+    vector<string> refs;
+    for(auto ref : call.references()){
+        refs.push_back(ref);
+    }
+    pair<Address, unsigned> result = policy.pick_executor(refs);
 
     GenericResponse response;
     if (result.first == ""){

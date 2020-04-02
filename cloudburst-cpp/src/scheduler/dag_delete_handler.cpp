@@ -13,7 +13,28 @@
 //  limitations under the License.
 #include "scheduler/scheduler_handlers.hpp"
 
-void dag_delete_handler(string serialized, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set < string>>> &dags,
+void dag_delete_handler(string dag_name, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set<string>>> &dags,
 BaseSchedulerPolicy &policy, map<string, unsigned> &call_frequency, logger log){
+    if(dags.find(dag_name) == dags.end()){
+        GenericResponse error;
+        error.set_success(false);
+        error.set_error(CloudburstError::NO_SUCH_DAG);
+        string serialized_error;
+        error.SerializeToString(&serialized_error);
+        kZmqUtil->send_string(serialized_error, &dag_delete_socket);
+        return;
+    }
+    Dag dag = dags.at(dag_name).first;
+    policy.discard_dag(dag);
 
+    for(string fname : dag.functions()){
+        call_frequency.erase(fname);
+    }
+    dags.erase(dag_name);
+    GenericResponse ok;
+    ok.set_success(true);
+    string serialized_ok;
+    ok.SerializeToString(&serialized_ok);
+    kZmqUtil->send_string(serialized_ok, &dag_delete_socket);
+    log->info("Dag %s deleted", dag_name);
 }

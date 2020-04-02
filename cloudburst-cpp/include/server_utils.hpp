@@ -21,6 +21,7 @@
 #include "common.hpp"
 
 using VectorClock = MapLattice<string, MaxLattice<unsigned>>;
+using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
 const string FUNC_PREFIX = "funcs/";
 const string BIND_ADDR_TEMPLATE = "tcp://*:%d";

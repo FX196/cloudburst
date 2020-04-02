@@ -39,10 +39,10 @@ void run_scheduler(string ip, string mgmt_ip, string rout_addr){
     map<string, unsigned> call_frequency;
 
     // Tracks the most recent arrival for each DAG -- used to calculate interarrival times.
-    map<string, unsigned> last_arrivals;
+    map<string, TimePoint> last_arrivals;
 
     // Tracks the time interval between successive requests for a particular DAG.
-    map<string, unsigned> interarrivals;
+    map<string, unsigned long long> interarrivals;
 
     // Maintains a list of all other schedulers in the system, so we can propagate metadata to them.
     vector<string> schedulers;

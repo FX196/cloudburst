@@ -36,7 +36,7 @@ protected:
     zmq::context_t context;
     SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
     map <string, pair<Dag, set<string>>> dags;
-    map<string, unsigned> call_frequency;
+    map<string, unsigned > call_frequency;
 public:
     void TearDown() {
         // clear all the logged messages after each test

@@ -14,5 +14,12 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void list_handler(string serialized, zmq::socket_t &list_socket, KvsClientInterface *kvs, logger log){
-
+    StringSet resp;
+    for(string func : get_func_list(kvs, serialized, log)){
+        string* key_ptr = resp.add_keys();
+        *key_ptr = func;
+    }
+    string serialized_resp;
+    resp.SerializeToString(&serialized_resp);
+    kZmqUtil->send_string(serialized_resp, &list_socket);
 }
