@@ -10,12 +10,20 @@
 class MockSchedulerPolicy : public BaseSchedulerPolicy {
 public:
     pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = ""){
+        if(pick_executor_responses_.size() == 0) {
+            std::cout << "Ran out of responses! Fix your test" << std::endl;
+            return pair<Address, unsigned>("", 0);
+        }
         pair<Address, unsigned> response = pick_executor_responses_[0];
         pick_executor_responses_.erase(pick_executor_responses_.begin());
         return response;
     }
 
     bool pin_function(string dag_name, string function_name){
+        if(pin_function_responses_.size() == 0) {
+            std::cout << "Ran out of responses! Fix your test" << std::endl;
+            return false;
+        }
         bool response = pin_function_responses_[0];
         pin_function_responses_.erase(pin_function_responses_.begin());
         return response;

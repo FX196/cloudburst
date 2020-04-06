@@ -32,6 +32,7 @@ void dag_call_handler(string serialized,
         response.set_success(false);
         response.set_error(CloudburstError::NO_SUCH_DAG);
         string serialized_error;
+        response.SerializeToString(&serialized_error);
         kZmqUtil->send_string(serialized_error, &dag_call_socket);
         return;
     }
@@ -69,7 +70,7 @@ void dag_call_handler(string serialized,
 
     // actuall call the dag
     DagSchedule schedule;
-    schedule.set_id(get_random_response_key());
+    schedule.set_id(get_random_id());
     auto* dag_ptr = schedule.mutable_dag();
     *dag_ptr = dag;
     schedule.set_start_time(start_time);
@@ -112,8 +113,10 @@ void dag_call_handler(string serialized,
         // copy over arguments
         auto func_args_ptr = call.mutable_function_args();
         auto sched_args_ptr = schedule.mutable_arguments();
-        (*sched_args_ptr)[fname].values().MergeFrom(*func_args_ptr)[fname].values());
-        //TODO: copying over ^
+        for(auto value : (*func_args_ptr)[fname].values()){
+            Value* add_val_ptr = (*sched_args_ptr)[fname].add_values();
+            *add_val_ptr = value;
+        }
     }
 
     // send DagSchedule's for all functions
@@ -134,7 +137,8 @@ void dag_call_handler(string serialized,
         // clear triggers from last function and add triggers for this one
         schedule.clear_triggers();
         for(string trigger : triggers){
-            schedule.triggers().Add(trigger);
+            string* add_trigger_ptr = schedule.add_triggers();
+            *add_trigger_ptr = trigger;
         }
         string serialized_schedule;
         schedule.SerializeToString(&serialized_schedule);

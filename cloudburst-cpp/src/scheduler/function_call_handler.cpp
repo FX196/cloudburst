@@ -19,7 +19,7 @@ SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
     call.ParseFromString(serialized);
 
     if (call.response_key().empty()){
-        call.set_response_key(get_random_response_key());
+        call.set_response_key(get_random_id());
     }
 
 

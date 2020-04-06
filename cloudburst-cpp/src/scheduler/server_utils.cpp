@@ -129,7 +129,7 @@ void put_func_list(KvsClientInterface *kvs, vector <string> funclist, logger log
     kvs_put(kvs, FUNCOBJ, serialize(lattice), log, LatticeType::SET);
 }
 
-string get_random_response_key(size_t length){
+string get_random_id(size_t length){
     auto randchar = []() -> char
     {
         const char charset[] =
@@ -142,4 +142,10 @@ string get_random_response_key(size_t length){
     std::string str(length,0);
     std::generate_n( str.begin(), length, randchar );
     return str;
+}
+string get_dag_trigger_address(string address){
+    std::size_t ind = address.find(":");
+    string ip = address.substr(0, ind);
+    string tid = address.substr(ind+1, address.size());
+    return "tcp://" + ip + ":" + std::to_string(std::stoi(tid) + DAG_EXEC_PORT);
 }

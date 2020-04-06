@@ -24,7 +24,6 @@ using VectorClock = MapLattice<string, MaxLattice<unsigned>>;
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
 const string FUNC_PREFIX = "funcs/";
-const string BIND_ADDR_TEMPLATE = "tcp://*:%d";
 
 const string FUNCOBJ = "funcs/index-allfuncs";
 
@@ -63,15 +62,6 @@ inline string get_func_kvs_name(string fname) {
     return FUNC_PREFIX + fname;
 }
 
-//inline string get_dag_trigger_address(string address) {
-//    vector <string> tokens;
-//    split(address, ":", tokens); TODO: split
-//    string ip, tid;
-//    ip = tokens[0];
-//    tid = tokens[1];
-//    return "tcp://" + ip + ":" + std::to_string(std::stoi(tid) + DAG_EXEC_PORT);
-//}
-
 inline string get_statistics_report_address(string mgmt_ip) {
     return "tcp://" + mgmt_ip + ":" + std::to_string(STATISTICS_REPORT_PORT);
 }
@@ -90,6 +80,10 @@ inline string get_user_msg_inbox_addr(string ip, string tid) {
     return "tcp://" + ip + ":" + std::to_string(std::stoi(tid) + RECV_INBOX_PORT);
 }
 
+inline string get_bind_address(unsigned port){
+    return "tcp://*:" + std::to_string(port);
+}
+
 bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log, LatticeType type);
 
 string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type); // TODO: how to return generic lattice?
@@ -98,7 +92,9 @@ vector<string> get_func_list(KvsClientInterface *kvs, string prefix, logger log,
 
 void put_func_list(KvsClientInterface *kvs, vector<string> funclist, logger log);
 
-string get_random_response_key(size_t length=16);
+string get_random_id(size_t length=16);
+
+string get_dag_trigger_address(string address);
 
 // generate_timestamp implemented in common.hpp
 

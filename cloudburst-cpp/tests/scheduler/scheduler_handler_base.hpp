@@ -37,6 +37,9 @@ protected:
     SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
     map <string, pair<Dag, set<string>>> dags;
     map<string, unsigned > call_frequency;
+    map<string, TimePoint> last_arrivals;
+    map<string, vector<unsigned long long>> interarrivals;
+
 public:
     void TearDown() {
         // clear all the logged messages after each test
