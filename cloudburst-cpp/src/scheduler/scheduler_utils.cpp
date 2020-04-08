@@ -17,9 +17,17 @@
 //VectorClock DEFAULT_VC = VectorClock();
 //DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
 
-//set<string> get_ip_set(string request_ip, SocketCache socket_cache){
-//
-//}
+set<string> get_ip_set(string request_ip, SocketCache socket_cache){
+    zmq::socket_t socket = socket_cache[ip];
+
+    kZmqUtil->send_string("", &socket);
+
+    StringSet ips;
+    ips.ParseFromString(kZmqUtil->recv_string(&socket));
+    set<string> result;
+
+    for
+}
 // Note: there is an additional bool argument `exec_threads` in the Python version,
 // but this function is never called with exec_threads=True, so only the case with
 // exec_threads=False is implemented
