@@ -21,7 +21,7 @@ TEST_F(SchedulerHandlerTest, DagDeleteDNE){
 
     zmq::socket_t dag_delete_socket(context, ZMQ_REP);
 
-    dag_delete_handler(dag_name, dag_delete_socket, dags, mock_policy, call_frequency, log_);
+    dag_delete_handler(dag_name, dag_delete_socket, dags, kSchedulerPolicy, call_frequency, log_);
 
     vector<string> messages = get_zmq_messages();
     EXPECT_EQ(messages.size(), 1);

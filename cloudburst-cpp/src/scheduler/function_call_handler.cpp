@@ -14,7 +14,7 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void function_call_handler(string serialized, zmq::socket_t &func_call_socket,
-SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
+SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     FunctionCall call;
     call.ParseFromString(serialized);
 
@@ -29,7 +29,7 @@ SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log){
     for(auto ref : call.references()){
         refs.push_back(ref);
     }
-    pair<Address, unsigned> result = policy.pick_executor(refs);
+    pair<Address, unsigned> result = policy->pick_executor(refs);
 
     GenericResponse response;
     if (result.first == ""){

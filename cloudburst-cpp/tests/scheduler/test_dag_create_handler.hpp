@@ -61,7 +61,7 @@ func_add.SerializeToString(&serialized_add);
 
     zmq::socket_t dag_create_socket(context, ZMQ_REP);
 
-    dag_create_handler(serialized, dag_create_socket, pusher_cache, kvs_mock, dags, mock_policy, call_frequency, log_);
+    dag_create_handler(serialized, dag_create_socket, pusher_cache, kvs_mock, dags, kSchedulerPolicy, call_frequency, log_);
 
     EXPECT_NE(dags.find("mul_mul_add"), dags.end());
     EXPECT_EQ(((KvsMockClient *) kvs_mock)->keys_put_[0], "mul_mul_add");

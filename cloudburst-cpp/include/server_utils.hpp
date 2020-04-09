@@ -23,6 +23,21 @@
 using VectorClock = MapLattice<string, MaxLattice<unsigned>>;
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
+struct pair_hash
+{
+    template <class T1, class T2>
+    std::size_t operator () (std::pair<T1, T2> const &pair) const
+    {
+        std::size_t h1 = std::hash<T1>()(pair.first);
+        std::size_t h2 = std::hash<T2>()(pair.second);
+
+        return h1 ^ h2;
+    }
+};
+
+template <class T, class H>
+using hset = std::unordered_set<T, H>;
+
 const string FUNC_PREFIX = "funcs/";
 
 const string FUNCOBJ = "funcs/index-allfuncs";
@@ -34,6 +49,13 @@ const unsigned DAG_QUEUE_PORT = 4030;
 const unsigned DAG_EXEC_PORT = 4040;
 const unsigned SELF_DEPART_PORT = 4050;
 
+const unsigned CONNECT_PORT = 5000;
+const unsigned FUNC_CREATE_PORT = 5001;
+const unsigned FUNC_CALL_PORT = 5002;
+const unsigned LIST_PORT = 5003;
+const unsigned DAG_CREATE_PORT = 5004;
+const unsigned DAG_CALL_PORT = 5005;
+const unsigned DAG_DELETE_PORT = 5006;
 const unsigned STATUS_PORT = 5007;
 const unsigned SCHED_UPDATE_PORT = 5008;
 const unsigned BACKOFF_PORT = 5009;

@@ -23,14 +23,14 @@ void connect_handler(string serialized, zmq::socket_t &connect_socket, string ro
 void function_create_handler(string serialized, zmq::socket_t &func_create_socket, KvsClientInterface *kvs, logger log, ConsistencyType consistency = NORMAL);
 
 void function_call_handler(string serialized, zmq::socket_t &func_call_socket,
-                           SocketCache &pusher_cache, BaseSchedulerPolicy &policy, logger log);
+                           SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log);
 
 void dag_create_handler(string serialized,
         zmq::socket_t &dag_create_socket,
         SocketCache &pusher_cache,
         KvsClientInterface *kvs,
         map<string, pair<Dag, set<string>>> &dags,
-        BaseSchedulerPolicy &policy,
+        SchedulerPolicyInterface *policy,
         map<string, unsigned> &call_frequency,
         logger log,
         unsigned num_replicas=1);
@@ -41,18 +41,18 @@ void dag_call_handler(string serialized,
         map<string, TimePoint> &last_arrivals,
         map<string, vector<unsigned long long>> &interarrivals,
         map<string, pair<Dag, set <string>>> &dags,
-        BaseSchedulerPolicy &policy,
+        SchedulerPolicyInterface *policy,
         map<string, unsigned> &call_frequency,
         logger log);
 
 void dag_delete_handler(string dag_name, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set < string>>> &dags,
-                        BaseSchedulerPolicy &policy, map<string, unsigned> &call_frequency, logger log);
+                        SchedulerPolicyInterface *policy, map<string, unsigned> &call_frequency, logger log);
 
 void list_handler(string serialized, zmq::socket_t &list_socket, KvsClientInterface *kvs, logger log);
 
-void exec_status_handler(string serialized, zmq::socket_t &exec_status_socket, BaseSchedulerPolicy &policy, logger log);
+void exec_status_handler(string serialized, zmq::socket_t &exec_status_socket, SchedulerPolicyInterface *policy, logger log);
 
-void sched_update_handler(string serialized, zmq::socket_t &sched_update_socket, KvsClientInterface *kvs, BaseSchedulerPolicy &policy,
+void sched_update_handler(string serialized, zmq::socket_t &sched_update_socket, KvsClientInterface *kvs, SchedulerPolicyInterface *policy,
                           map<string, unsigned> &call_frequency, logger log);
 
 #endif //DROPLET_SCHEDULER_HANDLERS_HPP

@@ -23,7 +23,7 @@ TEST_F(SchedulerHandlerTest, DagCallDagDNE){
 
     zmq::socket_t dag_call_socket(context, ZMQ_REP);
 
-    dag_call_handler(serialized_call, dag_call_socket, pusher_cache, last_arrivals, interarrivals, dags, mock_policy, call_frequency, log_);
+    dag_call_handler(serialized_call, dag_call_socket, pusher_cache, last_arrivals, interarrivals, dags, kSchedulerPolicy, call_frequency, log_);
 
     vector<string> messages = get_zmq_messages();
     EXPECT_EQ(messages.size(), 1);

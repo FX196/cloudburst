@@ -19,7 +19,7 @@ void dag_call_handler(string serialized,
                       map<string, TimePoint> &last_arrivals,
                       map<string, vector<unsigned long long>> &interarrivals,
                       map<string, pair<Dag, set<string>>> &dags,
-                      BaseSchedulerPolicy &policy,
+                      SchedulerPolicyInterface *policy,
                       map<string, unsigned> &call_frequency,
                       logger log){
     DagCall call;
@@ -93,7 +93,7 @@ void dag_call_handler(string serialized,
             refs.push_back(ref);
         }
         // try to assign executors for each function
-        pair<Address, unsigned> result = policy.pick_executor(refs);
+        pair<Address, unsigned> result = policy->pick_executor(refs);
         if (result.first == ""){
             GenericResponse response;
             response.set_success(false);

@@ -16,7 +16,7 @@
 #define DROPLET_SCHEDULER_UTILS_HPP
 
 #include "../server_utils.hpp"
-#include "policy/base_scheduler_policy.hpp"
+#include "policy/scheduler_policy_interface.hpp"
 
 // utils.py
 

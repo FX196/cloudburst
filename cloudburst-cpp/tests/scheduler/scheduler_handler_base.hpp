@@ -27,6 +27,7 @@ KvsMockClient kvs_mock_client;
 KvsClientInterface *kvs_mock = &kvs_mock_client;
 
 MockSchedulerPolicy mock_policy;
+SchedulerPolicyInterface *kSchedulerPolicy = &mock_policy;
 
 logger log_ = spdlog::basic_logger_mt("mock_log", "mock_log.txt", true);
 

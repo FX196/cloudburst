@@ -14,10 +14,13 @@
 
 #include "common.hpp"
 #include "client/kvs_client.hpp"
-#include "scheduler_handlers.hpp"
+#include "scheduler/scheduler_handlers.hpp"
+#include "scheduler/policy/mock_scheduler_policy.hpp"
+#include "yaml-cpp/yaml.h"
 
 const unsigned METADATA_THRESHOLD = 5; // TODO: in seconds?
 const unsigned REPORT_THRESHOLD = 5;
+const unsigned kRoutingThreadNum = 4;
 
 ZmqUtil zmq_util;
 ZmqUtilInterface *kZmqUtil = &zmq_util;
@@ -25,13 +28,20 @@ ZmqUtilInterface *kZmqUtil = &zmq_util;
 void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_addr){
 
     // set up logging
-    string log_file = "log_" + std::to_string(ip) + ".txt";
-    string log_name = "scheduler_log_" + std::to_string(ip);
+    string log_file = "log_" + ip + ".txt";
+    string log_name = "scheduler_log_" + ip;
     auto log = spdlog::basic_logger_mt(log_name, log_file, true);
     log->flush_on(spdlog::level::info);
 
     bool local = mgmt_ip.compare("") == 0;
-    KvsClient kvs(); //TODO: fill in constructor
+
+    vector<UserRoutingThread> threads;
+    for (unsigned i = 0; i < kRoutingThreadNum; i++) {
+        threads.push_back(UserRoutingThread(route_addr, i));
+    }
+
+    KvsClient client(threads, ip, 0, 10000);
+    KvsClientInterface *kvs = &client;
 
     string scheduler_id = get_random_id();
 
@@ -48,12 +58,12 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
     map<string, vector<unsigned long long>> interarrivals;
 
     // Maintains a list of all other schedulers in the system, so we can propagate metadata to them.
-    vector<string> schedulers;
+    set<string> schedulers;
 
     // ZMQ set up
     zmq::context_t context(1);
     SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
-    SocketCache requestor_cache = SocketCache(context, zmq.REQ);
+    SocketCache requestor_cache = SocketCache(&context, ZMQ_REQ);
 
     zmq::socket_t connect_socket(context, ZMQ_REP);
     connect_socket.bind(get_bind_address(CONNECT_PORT));
@@ -83,7 +93,8 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
     sched_update_socket.bind(get_bind_address(SCHED_UPDATE_PORT));
 
     zmq::socket_t pin_accept_socket(context, ZMQ_PULL);
-    zmq_setsockopt(pin_accept_socket, zmq.RCVTIMEO, 500); // TODO:Check docs if this line fails to compile
+    int timeout = 500;
+    zmq_setsockopt(pin_accept_socket, ZMQ_RCVTIMEO, &timeout, sizeof(int)); // TODO:Check docs if this line fails to compile
     pin_accept_socket.bind(get_bind_address(PIN_ACCEPT_PORT));
 
     //  Initialize poll set
@@ -100,6 +111,8 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
 
     // Initialize Policy
     // TODO: policy initiallization
+    MockSchedulerPolicy mock_policy;
+    kSchedulerPolicy = &mock_policy;
 
     // Enter event loop
     while(true){
@@ -122,14 +135,14 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
         // receives a function call request
         if (pollitems[2].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&func_call_socket);
-            function_call_handler(serialized, func_call_socket, pusher_cache, policy, log);
+            function_call_handler(serialized, func_call_socket, pusher_cache, kSchedulerPolicy, log);
         }
 
         // receives a dag create request
         if (pollitems[3].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&dag_create_socket);
             dag_create_handler(serialized, dag_create_socket, pusher_cache,
-                    kvs, dags, policy, call_frequency, log);
+                    kvs, dags, kSchedulerPolicy, call_frequency, log);
         }
 
         // receives a dag call request
@@ -137,14 +150,14 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
             string serialized = kZmqUtil->recv_string(&dag_call_socket);
             dag_call_handler(serialized, dag_call_socket, pusher_cache,
                     last_arrivals, interarrivals, dags,
-                    policy, call_frequency, log);
+                    kSchedulerPolicy, call_frequency, log);
         }
 
         // receives a dag delete request
         if (pollitems[5].revents & ZMQ_POLLIN) {
             string dag_name = kZmqUtil->recv_string(&dag_delete_socket);
             dag_delete_handler(dag_name, dag_delete_socket, dags,
-                    policy, call_frequency, log);
+                    kSchedulerPolicy, call_frequency, log);
         }
 
         // receives list request
@@ -172,14 +185,83 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
                 .count();
 
         if(duration > METADATA_THRESHOLD){
-            // update policy
+            // TODO: update policy
 
-            if(local){
-
+            if(!local){
+                schedulers = get_ip_set(get_scheduler_list_address(mgmt_ip),
+                        requestor_cache);
             }
         }
+
+        if(duration > REPORT_THRESHOLD){
+            SchedulerStatus status;
+            for(auto dag_name_info_pair : dags){
+                auto* dag_name_ptr = status.add_dags();
+                *dag_name_ptr = dag_name_info_pair.first;
+            }
+
+            // TODO: function locations
+
+            string msg;
+            status.SerializeToString(&msg);
+            for(string sched_ip : schedulers){
+                if(sched_ip.compare(ip) != 0){
+                    kZmqUtil->send_string(msg, &pusher_cache[
+                            get_scheduler_update_address(sched_ip)
+                            ]);
+                }
+            }
+
+            ExecutorStatistics stats;
+            for(auto func_freq_pair : call_frequency){
+                auto* fstats = stats.add_functions();
+                fstats->set_name(func_freq_pair.first);
+                fstats->set_call_count(func_freq_pair.second);
+                log->info("Reporting %d calls for function %s", func_freq_pair.second, func_freq_pair.first);
+                func_freq_pair.second = 0;
+            }
+
+            for(auto dname_time_pair : interarrivals){
+                auto* dstats = stats.add_dags();
+                dstats->set_name(dname_time_pair.first);
+                dstats->set_call_count(dname_time_pair.second.size() + 1);
+                for(auto runtime : dname_time_pair.second){
+                    dstats->add_interarrival(runtime);
+                }
+                dname_time_pair.second.clear();
+            }
+
+            if(!local){
+                string serialized_stats;
+                stats.SerializeToString(&serialized_stats);
+                kZmqUtil->send_string(serialized_stats, &pusher_cache[
+                        get_statistics_report_address(mgmt_ip)
+                        ]);
+            }
+
+            work_start = std::chrono::system_clock::now();
+        }
+    }
+}
+
+int main(int argc, char *argv[]){
+    string conf_file;
+    if(argc > 1){
+        conf_file = argv[1];
+    }
+    else {
+        conf_file = "conf/cloudburst-config.yml";
     }
 
+    YAML::Node conf = YAML::LoadFile(conf_file);
+    YAML::Node sched_conf = conf["scheduler"];
+    string metric_address = "http://" + sched_conf["metric_address"].as<string>() + ":3000/publish";
 
+    string mgmt_ip = conf["mgmt_ip"].as<string>();
+    std::cout << mgmt_ip << std::endl;
 
+//    run_scheduler(conf["ip"].as<string>(),
+//            conf["mgmt_ip"].as<string>(),
+//            sched_conf["routing_address"].as<string>(),
+//            metric_address);
 }

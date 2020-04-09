@@ -14,7 +14,7 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void dag_delete_handler(string dag_name, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set<string>>> &dags,
-BaseSchedulerPolicy &policy, map<string, unsigned> &call_frequency, logger log){
+SchedulerPolicyInterface *policy, map<string, unsigned> &call_frequency, logger log){
     if(dags.find(dag_name) == dags.end()){
         GenericResponse error;
         error.set_success(false);
@@ -25,7 +25,7 @@ BaseSchedulerPolicy &policy, map<string, unsigned> &call_frequency, logger log){
         return;
     }
     Dag dag = dags.at(dag_name).first;
-    policy.discard_dag(dag);
+    policy->discard_dag(dag);
 
     for(string fname : dag.functions()){
         call_frequency.erase(fname);

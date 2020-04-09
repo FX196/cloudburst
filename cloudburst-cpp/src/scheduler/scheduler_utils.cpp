@@ -18,15 +18,16 @@
 //DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
 
 set<string> get_ip_set(string request_ip, SocketCache socket_cache){
-    zmq::socket_t socket = socket_cache[ip];
-
-    kZmqUtil->send_string("", &socket);
+    kZmqUtil->send_string("", &socket_cache[request_ip]);
 
     StringSet ips;
-    ips.ParseFromString(kZmqUtil->recv_string(&socket));
+    ips.ParseFromString(kZmqUtil->recv_string(&socket_cache[request_ip]));
     set<string> result;
 
-    for
+    for(string ip : ips.keys()){
+        result.insert(ip);
+    }
+    return result;
 }
 // Note: there is an additional bool argument `exec_threads` in the Python version,
 // but this function is never called with exec_threads=True, so only the case with

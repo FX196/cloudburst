@@ -16,7 +16,7 @@
 void sched_update_handler(string serialized,
         zmq::socket_t &sched_update_socket,
         KvsClientInterface *kvs,
-        BaseSchedulerPolicy &policy,
+        SchedulerPolicyInterface *policy,
         map<string, unsigned> &call_frequency,
         logger log){
 

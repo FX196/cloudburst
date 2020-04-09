@@ -14,8 +14,8 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void exec_status_handler(string serialized,
-        zmq::socket_t &exec_status_socket,
-        BaseSchedulerPolicy &policy,
-        logger log){
+                         zmq::socket_t &exec_status_socket,
+                         SchedulerPolicyInterface *policy,
+                         logger log){
 
 }

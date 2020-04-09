@@ -14,7 +14,7 @@
 #include "scheduler/scheduler_handlers.hpp"
 
 void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, SocketCache &pusher_cache, KvsClientInterface *kvs,
-                        map <string, pair<Dag, set<string>>> &dags, BaseSchedulerPolicy &policy,
+                        map <string, pair<Dag, set<string>>> &dags, SchedulerPolicyInterface *policy,
                         map<string, unsigned> &call_frequency, logger log, unsigned num_replicas){
     Dag dag;
     dag.ParseFromString(serialized);
@@ -36,7 +36,7 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     for(auto fname: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {
             // policy will return false if there are no executors to pin this function
-            if(!(policy.pin_function(dag.name(), fname))){
+            if(!(policy->pin_function(dag.name(), fname))){
                 log->info("Creating DAG %s failed due to insufficient resources", dag.name());
                 GenericResponse error;
                 error.set_success(false);
@@ -46,7 +46,7 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
                 kZmqUtil->send_string(serialized, &dag_create_socket);
 
                 // unpin all previously pinned functions
-                policy.discard_dag(dag, true);
+                policy->discard_dag(dag, true);
                 return;
             }
         }
@@ -63,7 +63,7 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     }
 
     // Only create this metadata after all functions have been successfully created
-    policy.commit_dag(dag.name());
+    policy->commit_dag(dag.name());
     pair<Dag, set<string>> dag_sources_pair(dag, find_dag_source(dag));
     dags.insert(pair<string, pair<Dag, set<string>>>(dag.name(), dag_sources_pair));
 

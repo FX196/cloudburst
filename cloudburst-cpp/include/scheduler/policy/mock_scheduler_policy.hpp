@@ -5,9 +5,9 @@
 #ifndef PROJECT_MOCK_SCHEDULER_POLICY_HPP
 #define PROJECT_MOCK_SCHEDULER_POLICY_HPP
 
-#include "base_scheduler_policy.hpp"
+#include "scheduler_policy_interface.hpp"
 
-class MockSchedulerPolicy : public BaseSchedulerPolicy {
+class MockSchedulerPolicy : public SchedulerPolicyInterface {
 public:
     pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = ""){
         if(pick_executor_responses_.size() == 0) {

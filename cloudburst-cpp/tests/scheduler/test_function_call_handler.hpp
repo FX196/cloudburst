@@ -28,7 +28,7 @@ mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("tcp://12
 
 zmq::socket_t func_call_socket(context, ZMQ_REP);
 
-function_call_handler(serialized_call, func_call_socket, pusher_cache, mock_policy, log_);
+function_call_handler(serialized_call, func_call_socket, pusher_cache, kSchedulerPolicy, log_);
 
 vector<string> messages = get_zmq_messages();
 EXPECT_EQ(messages.size(), 2);
@@ -54,7 +54,7 @@ mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("", 0));
 
 zmq::socket_t func_call_socket(context, ZMQ_REP);
 
-function_call_handler(serialized_call, func_call_socket, pusher_cache, mock_policy, log_);
+function_call_handler(serialized_call, func_call_socket, pusher_cache, kSchedulerPolicy, log_);
 
 vector<string> messages = get_zmq_messages();
 EXPECT_EQ(messages.size(), 1);

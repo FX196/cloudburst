@@ -5,9 +5,9 @@
 #ifndef PROJECT_DEFAULT_SCHEDULER_POLICY_HPP
 #define PROJECT_DEFAULT_SCHEDULER_POLICY_HPP
 
-#include "base_scheduler_policy.hpp"
+#include "scheduler_policy_interface.hpp"
 
-class DefaultSchedulerPolicy : public BaseSchedulerPolicy {
+class DefaultSchedulerPolicy : public SchedulerPolicyInterface {
 private:
     // This scheduler's IP address.
     string ip_;
