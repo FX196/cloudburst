@@ -15,11 +15,13 @@
 #ifndef DROPLET_SERVER_UTILS_HPP
 #define DROPLET_SERVER_UTILS_HPP
 
+#include <google/protobuf/util/message_differencer.h>
 #include "lattices/core_lattices.hpp"
 #include "client/kvs_client.hpp"
 #include "cloudburst.pb.h"
 #include "common.hpp"
 
+using MessageDifferencer =google::protobuf::util::MessageDifferencer;
 using VectorClock = MapLattice<string, MaxLattice<unsigned>>;
 using TimePoint = std::chrono::time_point<std::chrono::system_clock>;
 
@@ -37,6 +39,9 @@ struct pair_hash
 
 template <class T, class H>
 using hset = std::unordered_set<T, H>;
+
+template <class K, class V>
+using pmap = hmap<K, V, pair_hash>;
 
 const string FUNC_PREFIX = "funcs/";
 
@@ -110,11 +115,20 @@ bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log, Latt
 
 string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type); // TODO: how to return generic lattice?
 
-vector<string> get_func_list(KvsClientInterface *kvs, string prefix, logger log, bool fullname=true);
+vector<string> get_func_list(KvsClientInterface *kvs, string prefix, logger log, bool fullname=false);
 
 void put_func_list(KvsClientInterface *kvs, vector<string> funclist, logger log);
 
 string get_random_id(size_t length=16);
+
+inline double get_random_double(){
+    return ((double) rand() / (RAND_MAX));
+}
+
+inline unsigned get_time_since_epoch(){
+    return std::chrono::duration_cast<std::chrono::milliseconds>(
+            std::chrono::system_clock::now().time_since_epoch()).count();
+}
 
 string get_dag_trigger_address(string address);
 

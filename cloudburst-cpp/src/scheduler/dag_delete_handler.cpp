@@ -27,8 +27,9 @@ SchedulerPolicyInterface *policy, map<string, unsigned> &call_frequency, logger 
     Dag dag = dags.at(dag_name).first;
     policy->discard_dag(dag);
 
-    for(string fname : dag.functions()){
-        call_frequency.erase(fname);
+    for(auto func_reference : dag.functions()){
+
+        call_frequency.erase(func_reference.name());
     }
     dags.erase(dag_name);
     GenericResponse ok;

@@ -40,7 +40,7 @@ vector <string> get_dag_predecessors(Dag dag, string fname) {
 
 bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log, LatticeType type) {
     string rid = kvs->put_async(key, value,
-                                   type); // TODO: check put SingleKeyCausalLattice<SetLattice<string>>
+                                   type);
 
     vector <KeyResponse> responses = kvs->receive_async();
     while (responses.size() == 0) {
@@ -90,6 +90,7 @@ bool kvs_put(KvsClientInterface *kvs, string key, string value, logger log, Latt
 //}
 
 string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type) {
+    // returns the payload associated with key
     kvs->get_async(key);
 
     vector <KeyResponse> responses = kvs->receive_async();
@@ -99,6 +100,10 @@ string kvs_get(KvsClientInterface *kvs, string key, logger log, LatticeType type
 
     if (responses.size() > 1) {
         log->error("Error: received more than one response");
+    }
+    if(responses[0].tuples(0).error() == AnnaError::KEY_DNE ||
+        responses[0].tuples(0).lattice_type() == LatticeType::NONE){
+        return "";
     }
     assert(responses[0].tuples(0).lattice_type() == type);
     return responses[0].tuples(0).payload();
@@ -143,6 +148,7 @@ string get_random_id(size_t length){
     std::generate_n( str.begin(), length, randchar );
     return str;
 }
+
 string get_dag_trigger_address(string address){
     std::size_t ind = address.find(":");
     string ip = address.substr(0, ind);

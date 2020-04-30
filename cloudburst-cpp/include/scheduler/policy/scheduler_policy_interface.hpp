@@ -16,13 +16,16 @@
 #ifndef PROJECT_SCHEDULER_POLICY_INTERFACE_HPP
 #define PROJECT_SCHEDULER_POLICY_INTERFACE_HPP
 
+#include "server_utils.hpp"
 #include "types.hpp"
 #include "cloudburst.pb.h"
 #include "internal.pb.h"
 
+using ThreadLocation = pair<Address, unsigned>;
+
 class SchedulerPolicyInterface {
 public:
-    virtual pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = "") = 0;
+    virtual ThreadLocation pick_executor(const vector<string>& references, string function_name = "") = 0;
 
     virtual bool pin_function(string dag_name, string function_name) = 0;
 
@@ -34,7 +37,7 @@ public:
 
     virtual void update() = 0;
 
-    virtual void update_function_locations(const vector<SchedulerStatus::FunctionLocation>& new_locations) = 0;
+    virtual void update_function_locations(SchedulerStatus& status) = 0;
 };
 
 extern SchedulerPolicyInterface* kSchedulerPolicy;

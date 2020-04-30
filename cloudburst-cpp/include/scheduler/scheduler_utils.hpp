@@ -57,7 +57,7 @@ inline string get_scheduler_update_address(string ip){
     return "tcp://" + ip + ":" + std::to_string(SCHED_UPDATE_PORT);
 }
 
-set<string> get_ip_set(string request_ip, SocketCache socket_cache);
+set<string> get_ip_set(string request_ip, SocketCache &socket_cache);
 // Note: there is an additional bool argument `exec_threads` in the Python version,
 // but this function is never called with exec_threads=True, so only the case with
 // exec_threads=False is implemented

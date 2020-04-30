@@ -30,6 +30,8 @@ connect_handler(serialized, connect_socket, route_addr, log_);
 messages = get_zmq_messages();
 EXPECT_EQ(messages.size(), 1);
 EXPECT_EQ(messages[0], "route_addr");
+
+std::cout << get_time_since_epoch() << std::endl;
 }
 
 #endif //PROJECT_TEST_CONNECT_HANDLER_HPP

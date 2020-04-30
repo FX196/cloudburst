@@ -33,7 +33,8 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     log->info("Creating DAG {}.", (dag.name()));
 
     // try to pin all functions in the dag
-    for(auto fname: dag.functions()){
+    for(auto& func_reference: dag.functions()){
+        string fname = func_reference.name();
         for (int i = 0; i < num_replicas; ++i) {
             // policy will return false if there are no executors to pin this function
             if(!(policy->pin_function(dag.name(), fname))){
@@ -56,7 +57,8 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
     kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
 
-    for(auto fname: dag.functions()){
+    for(auto& func_reference: dag.functions()){
+        string fname = func_reference.name();
         if(call_frequency.find(fname) == call_frequency.end()){
             call_frequency.insert(pair<string, unsigned>(fname, 0));
         }

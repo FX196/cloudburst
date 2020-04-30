@@ -17,7 +17,7 @@
 //VectorClock DEFAULT_VC = VectorClock();
 //DEFAULT_VC.insert("base", MaxLattice<unsigned>(1));
 
-set<string> get_ip_set(string request_ip, SocketCache socket_cache){
+set<string> get_ip_set(string request_ip, SocketCache &socket_cache){
     kZmqUtil->send_string("", &socket_cache[request_ip]);
 
     StringSet ips;
@@ -40,9 +40,10 @@ set<string> find_dag_source(Dag dag){
     }
 
     set<string> funcs;
-    for(const auto& func : dag.functions()){
-        if(sinks.find(func) != sinks.end()){
-            funcs.insert(func);
+    for(const auto& func_reference : dag.functions()){
+        string fname = func_reference.name();
+        if(sinks.find(fname) != sinks.end()){
+            funcs.insert(fname);
         }
     }
 

@@ -9,10 +9,10 @@
 
 class MockSchedulerPolicy : public SchedulerPolicyInterface {
 public:
-    pair<Address, unsigned> pick_executor(const vector<string>& references, string function_name = ""){
+    ThreadLocation pick_executor(const vector<string>& references, string function_name = ""){
         if(pick_executor_responses_.size() == 0) {
             std::cout << "Ran out of responses! Fix your test" << std::endl;
-            return pair<Address, unsigned>("", 0);
+            return ThreadLocation("", 0);
         }
         pair<Address, unsigned> response = pick_executor_responses_[0];
         pick_executor_responses_.erase(pick_executor_responses_.begin());
@@ -45,7 +45,7 @@ public:
 
     }
 
-    void update_function_locations(const vector<SchedulerStatus::FunctionLocation>& new_locations){
+    void update_function_locations(SchedulerStatus& status){
 
     }
 

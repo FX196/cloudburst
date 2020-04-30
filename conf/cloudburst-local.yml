@@ -1,5 +1,5 @@
 ip: 127.0.0.1
-mgmt_ip: NULL
+mgmt_ip: ""
 executor:
   scheduler_ips:
     - 127.0.0.1

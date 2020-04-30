@@ -16,14 +16,17 @@
 #include "client/kvs_client.hpp"
 #include "scheduler/scheduler_handlers.hpp"
 #include "scheduler/policy/mock_scheduler_policy.hpp"
+#include "scheduler/policy/default_scheduler_policy.hpp"
 #include "yaml-cpp/yaml.h"
 
-const unsigned METADATA_THRESHOLD = 5; // TODO: in seconds?
+const unsigned METADATA_THRESHOLD = 5;
 const unsigned REPORT_THRESHOLD = 5;
 const unsigned kRoutingThreadNum = 4;
 
 ZmqUtil zmq_util;
 ZmqUtilInterface *kZmqUtil = &zmq_util;
+
+SchedulerPolicyInterface* kSchedulerPolicy;
 
 void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_addr){
 
@@ -33,7 +36,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
     auto log = spdlog::basic_logger_mt(log_name, log_file, true);
     log->flush_on(spdlog::level::info);
 
-    bool local = mgmt_ip.compare("") == 0;
+    bool local = mgmt_ip.empty();
 
     vector<UserRoutingThread> threads;
     for (unsigned i = 0; i < kRoutingThreadNum; i++) {
@@ -49,7 +52,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
     map <string, pair<Dag, set<string>>> dags;
 
     // Tracks how many requests for each function is received.
-    map<string, unsigned > call_frequency;
+    map<string, unsigned> call_frequency;
 
     // Tracks the most recent arrival for each DAG -- used to calculate interarrival times.
     map<string, TimePoint> last_arrivals;
@@ -110,9 +113,13 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
             {static_cast<void *>(sched_update_socket), 0, ZMQ_POLLIN, 0}};
 
     // Initialize Policy
-    // TODO: policy initiallization
-    MockSchedulerPolicy mock_policy;
-    kSchedulerPolicy = &mock_policy;
+//    MockSchedulerPolicy mock_policy;
+//    kSchedulerPolicy = &mock_policy;
+
+    DefaultSchedulerPolicy policy(pin_accept_socket, pusher_cache, kvs, ip, log, local=local);
+    kSchedulerPolicy = &policy;
+
+
 
     // Enter event loop
     while(true){
@@ -163,19 +170,39 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
         // receives list request
         if (pollitems[6].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&list_socket);
-            // TODO: list handler
+            list_handler(serialized, list_socket, kvs, log);
         }
 
         // receives exec_status request
         if (pollitems[7].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&exec_status_socket);
-            // TODO: exec_status handler
+            ThreadStatus threadStatus;
+            threadStatus.ParseFromString(serialized);
+            policy.process_status(threadStatus);
         }
 
         // receives sched_update request
         if (pollitems[8].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&sched_update_socket);
-            // TODO: sched_update handler
+            SchedulerStatus schedulerStatus;
+            schedulerStatus.ParseFromString(serialized);
+
+            for(auto dname : schedulerStatus.dags()){
+                if(dags.find(dname) == dags.end()) {
+                    string payload = kvs_get(kvs, dname, log, LatticeType::LWW);
+                    LWWPairLattice<string> lattice = deserialize_lww(payload);
+                    Dag dag;
+                    dag.ParseFromString(lattice.reveal().value);
+                    dags[dag.name()] = std::make_pair(dag, find_dag_source(dag));
+
+                    for(const auto& func_reference : dag.functions()){
+                        string fname = func_reference.name();
+                        if(call_frequency.find(fname) == call_frequency.end()){
+                            call_frequency[fname] = 0;
+                        }
+                    }
+                }
+            }
         }
 
         auto work_end = std::chrono::system_clock::now();
@@ -185,7 +212,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
                 .count();
 
         if(duration > METADATA_THRESHOLD){
-            // TODO: update policy
+            policy.update();
 
             if(!local){
                 schedulers = get_ip_set(get_scheduler_list_address(mgmt_ip),
@@ -200,7 +227,14 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
                 *dag_name_ptr = dag_name_info_pair.first;
             }
 
-            // TODO: function locations
+            for(auto function_location_pair : ((DefaultSchedulerPolicy*) kSchedulerPolicy)->function_locations_){
+                for(auto location : function_location_pair.second){
+                    auto* floc =  status.add_function_locations();
+                    floc->set_name(function_location_pair.first);
+                    floc->set_ip(location.first);
+                    floc->set_tid(location.second);
+                }
+            }
 
             string msg;
             status.SerializeToString(&msg);
@@ -250,18 +284,19 @@ int main(int argc, char *argv[]){
         conf_file = argv[1];
     }
     else {
-        conf_file = "conf/cloudburst-config.yml";
+        conf_file = "conf/cloudburst-local.yml";
     }
 
     YAML::Node conf = YAML::LoadFile(conf_file);
     YAML::Node sched_conf = conf["scheduler"];
     string metric_address = "http://" + sched_conf["metric_address"].as<string>() + ":3000/publish";
+    std::cout << metric_address << std::endl;
 
     string mgmt_ip = conf["mgmt_ip"].as<string>();
     std::cout << mgmt_ip << std::endl;
 
-//    run_scheduler(conf["ip"].as<string>(),
-//            conf["mgmt_ip"].as<string>(),
-//            sched_conf["routing_address"].as<string>(),
-//            metric_address);
+    run_scheduler(conf["ip"].as<string>(),
+            conf["mgmt_ip"].as<string>(),
+            sched_conf["routing_address"].as<string>(),
+            metric_address);
 }

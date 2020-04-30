@@ -61,7 +61,8 @@ void dag_call_handler(string serialized,
     pair<Dag, set<string>> dag_sources_pair = dags.at(name);
     Dag dag = dag_sources_pair.first;
     set<string> sources = dag_sources_pair.second;
-    for(auto fname : dag.functions()){
+    for(auto func_reference : dag.functions()){
+        string fname = func_reference.name();
         call_frequency.at(fname) += 1;
     }
 
@@ -87,7 +88,8 @@ void dag_call_handler(string serialized,
     }
 
     // construct DagSchedule object
-    for(auto fname : dag.functions()){
+    for(auto func_reference : dag.functions()){
+        string fname = func_reference.name();
         vector<string> refs;
         for(auto ref: call.references()){
             refs.push_back(ref);
@@ -120,7 +122,8 @@ void dag_call_handler(string serialized,
     }
 
     // send DagSchedule's for all functions
-    for(auto fname : dag.functions()){
+    for(auto func_reference : dag.functions()){
+        string fname = func_reference.name();
         auto locations_ptr = schedule.mutable_locations();
         string location = (*locations_ptr)[fname];
         std::size_t ind = location.find(":");
