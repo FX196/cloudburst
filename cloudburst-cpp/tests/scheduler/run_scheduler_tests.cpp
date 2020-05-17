@@ -22,13 +22,9 @@
 #include "cloudburst.pb.h"
 
 
-#include "scheduler_handler_base.hpp"
-#include "test_connect_handler.hpp"
-#include "test_function_create_handler.hpp"
-#include "test_function_call_handler.hpp"
-#include "test_dag_create_handler.hpp"
-#include "test_dag_call_handler.hpp"
-#include "test_dag_delete_handler.hpp"
+#include "test_base.hpp"
+//#include "test_handlers.hpp"
+#include "test_default_policy.hpp"
 
 int main(int argc, char *argv[]) {
     log_->set_level(spdlog::level::info);

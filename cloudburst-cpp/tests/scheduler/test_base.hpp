@@ -19,6 +19,9 @@
 #include "mock_zmq_utils.hpp"
 #include "kvs_mock_client.hpp"
 #include "scheduler/policy/mock_scheduler_policy.hpp"
+#include "scheduler/policy/default_scheduler_policy.hpp"
+
+logger log_ = spdlog::basic_logger_mt("mock_log", "mock_log.txt", true);
 
 MockZmqUtil mock_zmq_util;
 ZmqUtilInterface *kZmqUtil = &mock_zmq_util;
@@ -26,29 +29,27 @@ ZmqUtilInterface *kZmqUtil = &mock_zmq_util;
 KvsMockClient kvs_mock_client;
 KvsClientInterface *kvs_mock = &kvs_mock_client;
 
-MockSchedulerPolicy mock_policy;
-SchedulerPolicyInterface *kSchedulerPolicy = &mock_policy;
+SchedulerPolicyInterface *kSchedulerPolicy;
 
-logger log_ = spdlog::basic_logger_mt("mock_log", "mock_log.txt", true);
+zmq::context_t context;
+SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
 
-class SchedulerHandlerTest : public ::testing::Test {
-    // initialization
+zmq::socket_t pin_accept_socket = zmq::socket_t(context, ZMQ_PULL);
+int timeout = 500;
+int rc = zmq_setsockopt(pin_accept_socket, ZMQ_RCVTIMEO, &timeout, sizeof(int)); // TODO:Check docs if this line fails to compile
+int bind = zmq_bind(pin_accept_socket, get_bind_address(PIN_ACCEPT_PORT).c_str());
+//pin_accept_socket.bind(get_bind_address(PIN_ACCEPT_PORT).c_str());
+
+DefaultSchedulerPolicy default_policy(pin_accept_socket, pusher_cache, kvs_mock, "127.0.0.1", log_, 0, true);
+
+class TestBase : public ::testing::Test {
 protected:
-    zmq::context_t context;
-    SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
     map <string, pair<Dag, set<string>>> dags;
     map<string, unsigned > call_frequency;
     map<string, TimePoint> last_arrivals;
     map<string, vector<unsigned long long>> interarrivals;
 
 public:
-    void TearDown() {
-        // clear all the logged messages after each test
-        mock_zmq_util.sent_messages.clear();
-        kvs_mock_client.clear();
-        mock_policy.pick_executor_responses_.clear();
-    }
-
     vector<string> get_zmq_messages() { return mock_zmq_util.sent_messages;}
 
     KeyResponse get_func_list_response(){
@@ -75,6 +76,38 @@ public:
         KeyTuple *tp = response.add_tuples();
         tp->set_error(AnnaError::NO_ERROR);
         return response;
+    }
+};
+
+class SchedulerHandlerTest : public TestBase {
+    // initialization
+
+public:
+    MockSchedulerPolicy mock_policy;
+
+    void SetUp() {
+        kSchedulerPolicy = &mock_policy;
+    }
+
+    void TearDown() {
+        // clear all the logged messages after each test
+        mock_zmq_util.sent_messages.clear();
+        kvs_mock_client.clear();
+        mock_policy.pick_executor_responses_.clear();
+    }
+};
+
+class PolicyTest : public TestBase {
+public:
+    void SetUp() {
+        kSchedulerPolicy = &default_policy;
+        (((DefaultSchedulerPolicy*) kSchedulerPolicy))->unpinned_executors_.insert({"127.0.0.1", 1});
+    }
+
+    void TearDown() {
+        // clear all the logged messages after each test
+        mock_zmq_util.sent_messages.clear();
+        kvs_mock_client.clear();
     }
 };
 

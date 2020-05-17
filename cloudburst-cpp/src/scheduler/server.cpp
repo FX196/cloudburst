@@ -116,7 +116,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
 //    MockSchedulerPolicy mock_policy;
 //    kSchedulerPolicy = &mock_policy;
 
-    DefaultSchedulerPolicy policy(pin_accept_socket, pusher_cache, kvs, ip, log, local=local);
+    DefaultSchedulerPolicy policy(pin_accept_socket, pusher_cache, kvs, ip, log, 0.20, true);
     kSchedulerPolicy = &policy;
 
 
