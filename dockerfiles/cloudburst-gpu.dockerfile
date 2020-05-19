@@ -12,7 +12,7 @@
 #  See the License for the specific language governing permissions and
 #  limitations under the License.
 
-FROM hydroproject/base:latest
+FROM hydroproject/base-cuda
 
 MAINTAINER Vikram Sreekanti <vsreekanti@gmail.com> version: 0.1
 
@@ -31,6 +31,7 @@ RUN git fetch -p origin && git checkout -b $build_branch origin/$source_branch
 RUN rm -rf /usr/lib/python3/dist-packages/yaml
 RUN rm -rf /usr/lib/python3/dist-packages/PyYAML-*
 RUN pip3 install -r requirements.txt
+
 WORKDIR $HYDRO_HOME
 RUN rm -rf anna
 RUN git clone --recurse-submodules https://github.com/hydro-project/anna
@@ -40,13 +41,16 @@ WORKDIR /
 
 # These installations are currently pipeline specific until we figure out a
 # better way to do package management for Python.
-RUN pip3 install tensorflow==1.12.0 tensorboard==1.12.2 scikit-image
+RUN pip3 install torchvision torch Pillow scikit-image
+
+WORKDIR /
+RUN git clone https://github.com/vsreekanti/flow
+RUN cd flow && python3.6 setup.py install
+
+RUN rm -rf /root/.local/
 
 COPY start-cloudburst.sh /start-cloudburst.sh
 
-RUN pip3 install pandas s3fs 
-
-RUN touch a
-RUN pip3 install --upgrade git+https://github.com/devin-petersohn/modin@engines/cloudburst_init
+RUN apt-get install -y net-tools
 
 CMD bash start-cloudburst.sh

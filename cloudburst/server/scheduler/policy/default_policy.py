@@ -19,7 +19,10 @@ import time
 import zmq
 
 from cloudburst.shared.proto.cloudburst_pb2 import GenericResponse
-from cloudburst.shared.proto.internal_pb2 import PinFunction
+from cloudburst.shared.proto.internal_pb2 import (
+    CPU, GPU, # Cloudburst's executor types
+    PinFunction
+)
 from cloudburst.shared.proto.shared_pb2 import StringSet
 from cloudburst.server.scheduler.policy.base_policy import (
     BaseCloudburstSchedulerPolicy
@@ -31,6 +34,8 @@ from cloudburst.server.scheduler.utils import (
 )
 
 sys_random = random.SystemRandom()
+
+NUM_EXECUTOR_THREADS = 3
 
 
 class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
@@ -61,7 +66,13 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         self.key_locations = {}
 
         # Executors which currently have no functions pinned on them.
-        self.unpinned_executors = set()
+        self.unpinned_cpu_executors = set()
+
+        # The subset of all executors that have access to GPUs and are
+        # currently unallocated.
+        # NOTE: We currently only support GPU executors # as a part of DAG
+        # requests.
+        self.unpinned_gpu_executors = set()
 
         # A map from function names to the executor(s) on which they are
         # pinned.
@@ -78,17 +89,12 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         # rather than by policy.
         self.random_threshold = random_threshold
 
-        self.unique_executors = set()
-
         # Indicates if we are running in local mode
         self.local = local
 
-    def get_unique_executors(self):
-        count = len(self.unique_executors)
-        self.unique_executors = set()
-        return count
 
-    def pick_executor(self, references, function_name=None):
+    def pick_executor(self, references, function_name=None, colocated=[],
+                      schedule=None):
         # Construct a map which maps from IP addresses to the number of
         # relevant arguments they have cached. For the time begin, we will
         # just pick the machine that has the most number of keys cached.
@@ -97,7 +103,20 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         if function_name:
             executors = set(self.function_locations[function_name])
         else:
-            executors = set(self.unpinned_executors)
+            executors = set(self.unpinned_cpu_executors)
+
+        # First priority is scheduling things on the same node if possible.
+        # Otherwise, continue on with the regular policy.
+        if len(colocated) > 0:
+            candidate_nodes = set()
+            for fn in colocated:
+                if fn in schedule.locations:
+                    ip = schedule.locations[fn].split(':')[0]
+                    candidate_nodes.add(ip)
+
+            for ip, tid in executors:
+                if ip in candidate_nodes:
+                    return ip, tid
 
         for executor in self.backoff:
             executors.discard(executor)
@@ -111,6 +130,7 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
                 executors.discard(key)
 
         if len(executors) == 0:
+            logging.error('No available executors.')
             return None
 
         executor_ips = set([e[0] for e in executors])
@@ -156,15 +176,19 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
         # Remove this IP/tid pair from the system's metadata until it notifies
         # us that it is available again, but only do this for non-DAG requests.
         if not self.local and not function_name:
-            self.unpinned_executors.discard(max_ip)
+            self.unpinned_cpu_executors.discard(max_ip)
 
-        self.unique_executors.add(max_ip)
+        if not max_ip:
+            logging.error('No available executors.')
+
         return max_ip
 
-    def pin_function(self, dag_name, function_ref):
+    def pin_function(self, dag_name, function_ref, colocated):
         # If there are no functions left to choose from, then we return None,
         # indicating that we ran out of resources to use.
-        if len(self.unpinned_executors) == 0:
+        if function_ref.gpu and len(self.unpinned_gpu_executors) == 0:
+            return False
+        elif not function_ref.gpu and len(self.unpinned_cpu_executors) == 0:
             return False
 
         if dag_name not in self.pending_dags:
@@ -172,11 +196,49 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
         # Make a copy of the set of executors, so that we don't modify the
         # system's metadata.
-        candidates = set(self.unpinned_executors)
+        if function_ref.gpu:
+            candidates = set(self.unpinned_gpu_executors)
+        elif len(colocated) == 0:
+            # If this is not a GPU function, just look at all of the unpinned
+            # executors.
+            candidates = set(self.unpinned_cpu_executors)
+        else:
+            candidates = set()
+
+            already_pinned = set()
+            for fn, thread in self.pending_dags[dag_name]:
+                if fn in colocated:
+                    already_pinned.add((fn, thread))
+            candidate_nodes = set()
+
+            if len(already_pinned) > 0:
+                for fn, thread in already_pinned:
+                    candidate_nodes.add(thread[0]) # The node's IP
+
+                for node, tid in self.unpinned_cpu_executors:
+                    if node in candidate_nodes:
+                        candidates.add((node, tid))
+            else:
+                # If this is the first colocate to be pinned, try to assign to
+                # an empty node.
+                nodes = {}
+                for node, tid in self.unpinned_cpu_executors:
+                    if node not in nodes:
+                        nodes[node] = 0
+                    nodes[node] += 1
+
+                for node in nodes:
+                    if nodes[node] == NUM_EXECUTOR_THREADS:
+                        for i in range(NUM_EXECUTOR_THREADS):
+                            candidates.add((node, i))
+
+        if len(candidates) == 0: # There no valid executors to colocate on.
+            return self.pin_function(dag_name, function_ref, [])
 
         # Construct a PinFunction message to be sent to executors.
         pin_msg = PinFunction()
         pin_msg.name = function_ref.name
+        pin_msg.batching = function_ref.batching
         pin_msg.response_address = self.ip
 
         serialized = pin_msg.SerializeToString()
@@ -199,11 +261,15 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
             # Do not use this executor either way: If it rejected, it has
             # something else pinned, and if it accepted, it has pinned what we
-            # just asked it to pin.
-            # In local model allow executors to have multiple functions pinned
+            # just asked it to pin. In local mode, however we allow executors
+            # to have multiple functions pinned.
             if not self.local:
-                self.unpinned_executors.discard((node, tid))
-                candidates.discard((node, tid))
+                if function_ref.gpu:
+                    self.unpinned_gpu_executors.discard((node, tid))
+                    candidates.discard((node, tid))
+                else:
+                    self.unpinned_cpu_executors.discard((node, tid))
+                    candidates.discard((node, tid))
 
             if response.success:
                 # The pin operation succeeded, so we return the node and thread
@@ -217,6 +283,11 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
                               % (node, tid, function_ref.name))
 
                 continue
+
+            if len(candidates) == 0 and len(colocated) > 0:
+                # Try again without colocation.
+                return self.pin_function(self, dag_name, function_ref, [])
+
 
     def commit_dag(self, dag_name):
         for function_name, location in self.pending_dags[dag_name]:
@@ -263,11 +334,18 @@ class DefaultCloudburstSchedulerPolicy(BaseCloudburstSchedulerPolicy):
 
                 del self.thread_statuses[key]
 
-            self.unpinned_executors.discard(key)
+            if status.type == CPU:
+                self.unpinned_cpu_executors.discard(key)
+            else:
+                self.unpinned_gpu_executors.discard(key)
+
             return
 
         if len(status.functions) == 0:
-            self.unpinned_executors.add(key)
+            if status.type == CPU:
+                self.unpinned_cpu_executors.add(key)
+            else:
+                self.unpinned_gpu_executors.add(key)
 
         # Remove all the old function locations, and all the new ones -- there
         # will probably be a large overlap, but this shouldn't be much
