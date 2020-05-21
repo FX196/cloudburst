@@ -227,7 +227,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_a
                 *dag_name_ptr = dag_name_info_pair.first;
             }
 
-            for(auto function_location_pair : ((DefaultSchedulerPolicy*) kSchedulerPolicy)->function_locations_){
+            for(auto function_location_pair : ((DefaultSchedulerPolicy*) kSchedulerPolicy)->function_locations){
                 for(auto location : function_location_pair.second){
                     auto* floc =  status.add_function_locations();
                     floc->set_name(function_location_pair.first);

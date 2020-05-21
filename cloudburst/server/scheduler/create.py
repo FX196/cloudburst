@@ -42,7 +42,7 @@ def create_function(func_create_socket, kvs, consistency=NORMAL):
 
     if consistency == NORMAL:
         body = LWWPairLattice(sutils.generate_timestamp(0), func.body)
-        res = kvs.put(name, body)
+        kvs.put(name, body)
     else:
         skcl = SingleKeyCausalLattice(sutils.DEFAULT_VC,
                                       SetLattice({func.body}))
@@ -78,12 +78,7 @@ def create_dag(dag_create_socket, pusher_cache, kvs, dags, policy,
 
     for fref in dag.functions:
         for _ in range(num_replicas):
-            colocated = []
-
-            if fref.name in dag.colocated:
-                colocated = list(dag.colocated)
-
-            success = policy.pin_function(dag.name, fref, colocated)
+            success = policy.pin_function(dag.name, fref)
 
             # The policy engine will only return False if it ran out of
             # resources on which to attempt to pin this function.

@@ -19,7 +19,7 @@ public:
         return response;
     }
 
-    bool pin_function(string dag_name, string function_name){
+    bool pin_function(string dag_name, const Dag::FunctionReference& func_ref){
         if(pin_function_responses_.size() == 0) {
             std::cout << "Ran out of responses! Fix your test" << std::endl;
             return false;

@@ -26,58 +26,60 @@ using ThreadLocation = pair<Address, unsigned>;
 class SchedulerPolicyInterface {
 public:
     // This scheduler's IP address.
-    string ip_;
+    string ip;
 
     zmq::socket_t* pin_accept_socket_ptr;
 
     SocketCache* pusher_cache_ptr;
 
-    KvsClientInterface* kvs_client_;
+    KvsClientInterface* kvs_client;
 
-    pmap<ThreadLocation, set<unsigned>> running_counts_;
+    pmap<ThreadLocation, set<unsigned>> running_counts;
 
-    pmap<ThreadLocation, TimePoint> backoff_;
+    pmap<ThreadLocation, TimePoint> backoff;
 
-    map<string, set<Address>> key_locations_;
+    map<string, set<Address>> key_locations;
 
-    hset<ThreadLocation, pair_hash> unpinned_executors_;
+    hset<ThreadLocation, pair_hash> unpinned_executors;
 
-    map<string, hset<ThreadLocation, pair_hash>> function_locations_;
+    map<string, hset<ThreadLocation, pair_hash>> function_locations;
 
-    map<string, vector<pair<string, ThreadLocation>>> pending_dags_;
+    map<string, vector<pair<string, ThreadLocation>>> pending_dags;
 
-    pmap<ThreadLocation, ThreadStatus> thread_statuses_;
+    pmap<ThreadLocation, ThreadStatus> thread_statuses;
 
-    float random_threshold_;
+    float random_threshold;
 
-    hset<ThreadLocation, pair_hash> unique_executors_;
+    hset<ThreadLocation, pair_hash> unique_executors;
 
-    bool local_;
+    bool local;
 
-    logger log_;
+    logger log;
 
 public:
+    SchedulerPolicyInterface() {}
+
     SchedulerPolicyInterface(zmq::socket_t &pin_accept_socket, SocketCache &pusher_cache, KvsClientInterface* kvs,
             string ip, logger log, float random_threshold=0.20, bool local=false):
-    ip_(ip),
+    ip(ip),
     pin_accept_socket_ptr(&pin_accept_socket),
     pusher_cache_ptr(&pusher_cache),
-    kvs_client_(kvs),
-    running_counts_(pmap<ThreadLocation, set<unsigned>>()),
-    backoff_(pmap<ThreadLocation, TimePoint>()),
-    key_locations_(map<string, set<Address>>()),
-    unpinned_executors_(hset<ThreadLocation, pair_hash>()),
-    function_locations_(map<string, hset<ThreadLocation, pair_hash>>()),
-    pending_dags_(map<string, vector<pair<string, ThreadLocation>>>()),
-    thread_statuses_(pmap<ThreadLocation, ThreadStatus>()),
-    random_threshold_(random_threshold),
-    unique_executors_(),
-    local_(local),
-    log_(log) {}
+    kvs_client(kvs),
+    running_counts(),
+    backoff(),
+    key_locations(),
+    unpinned_executors(),
+    function_locations(),
+    pending_dags(),
+    thread_statuses(),
+    random_threshold(random_threshold),
+    unique_executors(),
+    local(local),
+    log(log) {}
 
     virtual ThreadLocation pick_executor(const vector<string>& references, string function_name = "") = 0;
 
-    virtual bool pin_function(string dag_name, string function_name) = 0;
+    virtual bool pin_function(string dag_name, const Dag::FunctionReference& func_ref) = 0;
 
     virtual void commit_dag(string dag_name) = 0;
 

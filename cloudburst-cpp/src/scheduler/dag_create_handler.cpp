@@ -34,10 +34,9 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
 
     // try to pin all functions in the dag
     for(auto& func_reference: dag.functions()){
-        string fname = func_reference.name();
         for (int i = 0; i < num_replicas; ++i) {
             // policy will return false if there are no executors to pin this function
-            if(!(policy->pin_function(dag.name(), fname))){
+            if(!(policy->pin_function(dag.name(), func_reference))){
                 log->info("Creating DAG %s failed due to insufficient resources", dag.name());
                 GenericResponse error;
                 error.set_success(false);

@@ -23,7 +23,7 @@
 
 
 #include "test_base.hpp"
-//#include "test_handlers.hpp"
+#include "test_handlers.hpp"
 #include "test_default_policy.hpp"
 
 int main(int argc, char *argv[]) {

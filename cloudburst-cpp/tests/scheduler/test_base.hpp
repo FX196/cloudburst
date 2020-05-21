@@ -40,7 +40,7 @@ int rc = zmq_setsockopt(pin_accept_socket, ZMQ_RCVTIMEO, &timeout, sizeof(int));
 int bind = zmq_bind(pin_accept_socket, get_bind_address(PIN_ACCEPT_PORT).c_str());
 //pin_accept_socket.bind(get_bind_address(PIN_ACCEPT_PORT).c_str());
 
-DefaultSchedulerPolicy default_policy(pin_accept_socket, pusher_cache, kvs_mock, "127.0.0.1", log_, 0, true);
+DefaultSchedulerPolicy default_policy(pin_accept_socket, pusher_cache, kvs_mock, "127.0.0.1", log_, 0, false);
 
 class TestBase : public ::testing::Test {
 protected:
@@ -51,6 +51,7 @@ protected:
 
 public:
     vector<string> get_zmq_messages() { return mock_zmq_util.sent_messages;}
+    void add_zmq_response(string resp) { mock_zmq_util.responses.push_back(resp); }
 
     KeyResponse get_func_list_response(){
         KeyResponse response;
@@ -101,13 +102,19 @@ class PolicyTest : public TestBase {
 public:
     void SetUp() {
         kSchedulerPolicy = &default_policy;
-        (((DefaultSchedulerPolicy*) kSchedulerPolicy))->unpinned_executors_.insert({"127.0.0.1", 1});
     }
 
     void TearDown() {
         // clear all the logged messages after each test
         mock_zmq_util.sent_messages.clear();
         kvs_mock_client.clear();
+        kSchedulerPolicy->running_counts.clear();
+        kSchedulerPolicy->backoff.clear();
+        kSchedulerPolicy->key_locations.clear();
+        kSchedulerPolicy->unpinned_executors.clear();
+        kSchedulerPolicy->function_locations.clear();
+        kSchedulerPolicy->pending_dags.clear();
+        kSchedulerPolicy->thread_statuses.clear();
     }
 };
 
