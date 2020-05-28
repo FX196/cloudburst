@@ -284,16 +284,11 @@ int main(int argc, char *argv[]){
         conf_file = argv[1];
     }
     else {
-        conf_file = "conf/cloudburst-local.yml";
+        conf_file = "conf/cloudburst-config.yml";
     }
 
     YAML::Node conf = YAML::LoadFile(conf_file);
     YAML::Node sched_conf = conf["scheduler"];
-    string metric_address = "http://" + sched_conf["metric_address"].as<string>() + ":3000/publish";
-    std::cout << metric_address << std::endl;
-
-    string mgmt_ip = conf["mgmt_ip"].as<string>();
-    std::cout << mgmt_ip << std::endl;
 
     run_scheduler(conf["ip"].as<string>(),
             conf["mgmt_ip"].as<string>(),
