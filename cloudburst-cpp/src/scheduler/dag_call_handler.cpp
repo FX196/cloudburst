@@ -76,7 +76,7 @@ void dag_call_handler(string serialized,
     *dag_ptr = dag;
     schedule.set_start_time(start_time);
     schedule.set_consistency(call.consistency());
-    
+
     if(call.response_address() != ""){
         schedule.set_response_address(call.response_address());
     }
@@ -91,7 +91,7 @@ void dag_call_handler(string serialized,
     for(auto func_reference : dag.functions()){
         string fname = func_reference.name();
         vector<string> refs;
-        for(auto ref: call.references()){
+        for(auto ref: (call.function_args().at(fname)).references()){
             refs.push_back(ref);
         }
         // try to assign executors for each function
