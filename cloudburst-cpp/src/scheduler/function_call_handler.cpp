@@ -22,8 +22,6 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
         call.set_response_key(get_random_id());
     }
 
-
-
     // pick a node for this request.
     vector<string> refs;
     for(auto ref : call.references()){

@@ -90,9 +90,9 @@ TEST_F(SchedulerHandlerTest, FunctionCallSuccess){
     response.ParseFromString(messages[1]);
     EXPECT_EQ(response.success(), true);
     EXPECT_EQ(response.response_id(), received_call.response_key());
-    }
+}
 
-    TEST_F(SchedulerHandlerTest, FunctionCallFail){
+TEST_F(SchedulerHandlerTest, FunctionCallFail){
     FunctionCall call;
     call.set_name("foo");
     string serialized_call;
@@ -187,9 +187,9 @@ TEST_F(SchedulerHandlerTest, DagDeleteDNE){
     received_response.ParseFromString(messages[0]);
     EXPECT_EQ(received_response.success(), false);
     EXPECT_EQ(received_response.error(), CloudburstError::NO_SUCH_DAG);
-    }
+}
 
-    TEST_F(SchedulerHandlerTest, DagCallDagDNE){
+TEST_F(SchedulerHandlerTest, DagCallDagDNE){
     DagCall call;
     call.set_name("none");
     string serialized_call;
