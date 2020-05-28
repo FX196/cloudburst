@@ -28,7 +28,7 @@ ZmqUtilInterface *kZmqUtil = &zmq_util;
 
 SchedulerPolicyInterface* kSchedulerPolicy;
 
-void run_scheduler(string ip, string mgmt_ip, string route_addr, string metric_addr){
+void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
     // set up logging
     string log_file = "log_" + ip + ".txt";
@@ -292,6 +292,5 @@ int main(int argc, char *argv[]){
 
     run_scheduler(conf["ip"].as<string>(),
             conf["mgmt_ip"].as<string>(),
-            sched_conf["routing_address"].as<string>(),
-            metric_address);
+            sched_conf["routing_address"].as<string>());
 }

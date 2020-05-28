@@ -49,7 +49,7 @@ python3.6 setup.py install
 
 cd $HYDRO_HOME/cloudburst
 if [[ -z "$REPO_ORG" ]]; then
-  REPO_ORG="hydro-project"
+  REPO_ORG="FX196"
 fi
 
 if [[ -z "$REPO_BRANCH" ]]; then
@@ -101,7 +101,7 @@ elif [[ "$ROLE" = "scheduler" ]]; then
   echo "scheduler:" >> conf/cloudburst-config.yml
   echo "    routing_address: $ROUTE_ADDR" >> conf/cloudburst-config.yml
 
-  python3.6 cloudburst/server/scheduler/server.py
+  cloudburst-cpp/build/target/scheduler/scheduer
 elif [[ "$ROLE" = "benchmark" ]]; then
   echo "benchmark:" >> conf/cloudburst-config.yml
   echo "    cloudburst_address: $FUNCTION_ADDR" >> conf/cloudburst-config.yml
@@ -109,4 +109,3 @@ elif [[ "$ROLE" = "benchmark" ]]; then
 
   python3.6 cloudburst/server/benchmarks/server.py
 fi
-

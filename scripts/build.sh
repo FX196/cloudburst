@@ -42,3 +42,9 @@ else
   sed -i "s|import anna_pb2|from . import anna_pb2|g" $(find cloudburst/shared/proto | grep pb2 | grep -v pyc | grep -v internal)
   sed -i "s|import cloudburst_pb2|from . import cloudburst_pb2|g" $(find cloudburst/shared/proto | grep pb2 | grep -v pyc | grep -v internal)
 fi
+
+rm -rf cloudburst-cpp/build
+mkdir cloudburst-cpp/build
+cd cloudburst-cpp/build
+cmake ..
+make -j2
