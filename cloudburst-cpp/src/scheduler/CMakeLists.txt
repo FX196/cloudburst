@@ -36,5 +36,5 @@ SET(SCHEDULER_SOURCE
         server_utils.cpp)
 
 ADD_EXECUTABLE(scheduler ${SCHEDULER_SOURCE})
-TARGET_LINK_LIBRARIES(scheduler ${SCHED_LIBRARY_DEPENDENCIES})
+TARGET_LINK_LIBRARIES(scheduler ${SCHED_LIBRARY_DEPENDENCIES} protobuf::libprotobuf)
 ADD_DEPENDENCIES(scheduler hydro-zmq zeromq zeromqcpp)
