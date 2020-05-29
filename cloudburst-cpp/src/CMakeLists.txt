@@ -20,7 +20,8 @@ SET(SCHED_LIBRARY_DEPENDENCIES
         pthread
         zmq
         hydro-zmq
-        yaml-cpp)
+        yaml-cpp
+)
 
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/target/scheduler)
