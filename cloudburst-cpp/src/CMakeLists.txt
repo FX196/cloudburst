@@ -14,7 +14,7 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
-SET(KV_LIBRARY_DEPENDENCIES
+SET(SCHED_LIBRARY_DEPENDENCIES
         protobuf::libprotobuf
         cloudburst-proto
         pthread

@@ -36,5 +36,5 @@ SET(SCHEDULER_SOURCE
         server_utils.cpp)
 
 ADD_EXECUTABLE(scheduler ${SCHEDULER_SOURCE})
-TARGET_LINK_LIBRARIES(scheduler ${KV_LIBRARY_DEPENDENCIES})
-ADD_DEPENDENCIES(scheduler hydro-zmq zeromq zeromqcpp)
+TARGET_LINK_LIBRARIES(scheduler ${SCHED_LIBRARY_DEPENDENCIES})
+ADD_DEPENDENCIES(scheduler hydro-zmq zeromq zeromqcpp protobuf::libprotobuf cloudburst-proto)

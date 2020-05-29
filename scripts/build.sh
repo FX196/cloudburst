@@ -46,5 +46,5 @@ fi
 rm -rf cloudburst-cpp/build
 mkdir cloudburst-cpp/build
 cd cloudburst-cpp/build
-cmake ..
+cmake -std=c++11 ..
 make -j2
