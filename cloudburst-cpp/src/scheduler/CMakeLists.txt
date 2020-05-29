@@ -14,6 +14,15 @@
 
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
+#SET(SCHEDULER_SOURCE
+##        server.cpp
+#        function_create_handler.cpp
+#        function_call_handler.cpp
+#        dag_create_handler.cpp
+#        connect_handler.cpp
+#        scheduler_utils.cpp
+#        server_utils.cpp)
+
 SET(SCHEDULER_SOURCE
         server.cpp
         function_create_handler.cpp
@@ -27,5 +36,5 @@ SET(SCHEDULER_SOURCE
         server_utils.cpp)
 
 ADD_EXECUTABLE(scheduler ${SCHEDULER_SOURCE})
-TARGET_LINK_LIBRARIES(scheduler ${SCHED_LIBRARY_DEPENDENCIES} protobuf::libprotobuf cloudburst-proto)
+TARGET_LINK_LIBRARIES(scheduler ${SCHED_LIBRARY_DEPENDENCIES} protobuf::libprotobuf)
 ADD_DEPENDENCIES(scheduler hydro-zmq zeromq zeromqcpp)

@@ -15,13 +15,12 @@
 CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
 SET(SCHED_LIBRARY_DEPENDENCIES
-    protobuf::libprotobuf
-    cloudburst-proto
-    pthread
-    zmq
-    hydro-zmq
-    yaml-cpp
-)
+        protobuf::libprotobuf
+        cloudburst-proto
+        pthread
+        zmq
+        hydro-zmq
+        yaml-cpp)
 
 
 SET(EXECUTABLE_OUTPUT_PATH ${CMAKE_BINARY_DIR}/target/scheduler)
