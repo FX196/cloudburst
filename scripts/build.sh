@@ -46,5 +46,5 @@ fi
 rm -rf cloudburst-cpp/build
 mkdir cloudburst-cpp/build
 cd cloudburst-cpp/build
-cmake -std=c++11 ..
+cmake -std=c++11 "-GUnix Makefiles" -DCMAKE_BUILD_TYPE="Release" -DCMAKE_CXX_COMPILER="/usr/bin/clang++" "" ..
 make -j2
