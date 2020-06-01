@@ -16,7 +16,8 @@
 #define DROPLET_SCHEDULER_HANDLERS_HPP
 
 #include "scheduler_utils.hpp"
-#include "client/kvs_client.hpp"
+#include "server_utils.hpp"
+#include "policy/scheduler_policy_interface.hpp"
 
 void connect_handler(string serialized, zmq::socket_t &connect_socket, string route_addr, logger log);
 

@@ -12,8 +12,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 
-#include "common.hpp"
-#include "client/kvs_client.hpp"
 #include "scheduler/scheduler_handlers.hpp"
 #include "scheduler/policy/mock_scheduler_policy.hpp"
 #include "scheduler/policy/default_scheduler_policy.hpp"

@@ -15,9 +15,6 @@
 #ifndef DROPLET_SCHEDULER_UTILS_HPP
 #define DROPLET_SCHEDULER_UTILS_HPP
 
-#include "../server_utils.hpp"
-#include "policy/scheduler_policy_interface.hpp"
-
 // utils.py
 
 const unsigned NUM_EXEC_THREADS = 3;

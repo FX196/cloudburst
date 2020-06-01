@@ -19,6 +19,7 @@
 #include "lattices/core_lattices.hpp"
 #include "client/kvs_client.hpp"
 #include "cloudburst.pb.h"
+#include "anna.pb.h"
 #include "common.hpp"
 
 using MessageDifferencer =google::protobuf::util::MessageDifferencer;

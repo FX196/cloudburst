@@ -12,7 +12,6 @@
 //  See the License for the specific language governing permissions and
 //  limitations under the License.
 #include "server_utils.hpp"
-#include "anna.pb.h"
 
 vector <string> get_dag_predecessors(Dag dag, string fname) {
     vector <string> result;

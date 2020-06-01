@@ -44,7 +44,7 @@ RUN pip3 install tensorflow==1.12.0 tensorboard==1.12.2 scikit-image
 
 COPY start-cloudburst.sh /start-cloudburst.sh
 
-RUN pip3 install pandas s3fs 
+RUN pip3 install pandas s3fs
 
 RUN touch a
 RUN pip3 install --upgrade git+https://github.com/devin-petersohn/modin@engines/cloudburst_init
