@@ -16,6 +16,7 @@ CMAKE_MINIMUM_REQUIRED(VERSION 3.6 FATAL_ERROR)
 
 SET(SCHED_LIBRARY_DEPENDENCIES
         protobuf::libprotobuf
+        ${PROTOBUF_LIBRARY}
         cloudburst-proto
         pthread
         zmq
