@@ -101,7 +101,7 @@ elif [[ "$ROLE" = "scheduler" ]]; then
   echo "scheduler:" >> conf/cloudburst-config.yml
   echo "    routing_address: $ROUTE_ADDR" >> conf/cloudburst-config.yml
 
-  ./cloudburst-cpp/build/target/scheduler/scheduer
+  ./cloudburst-cpp/build/target/scheduler/scheduler
 elif [[ "$ROLE" = "benchmark" ]]; then
   echo "benchmark:" >> conf/cloudburst-config.yml
   echo "    cloudburst_address: $FUNCTION_ADDR" >> conf/cloudburst-config.yml
