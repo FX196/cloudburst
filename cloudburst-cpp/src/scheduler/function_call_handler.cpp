@@ -20,7 +20,8 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     call.ParseFromString(serialized);
 
     if (call.response_key().empty()){
-        call.set_response_key(get_random_id());
+        // call.set_response_key(get_random_id());
+        call.set_response_key("521d6db5-7f5c-4523-bf6e-280a4f230626");
     }
 
     // pick a node for this request.
@@ -50,7 +51,7 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     call.SerializeToString(&serialized_send);
     kZmqUtil->send_string(serialized_send, &pusher_cache[get_exec_address(ip, tid)]);
 
-    std::cout << "sent to executor" << std::endl;
+    std::cout << "sent to executor via " << get_exec_address(ip, tid) << std::endl;
 
     response.set_success(true);
     response.set_response_id(call.response_key());
@@ -58,5 +59,5 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     response.SerializeToString(&serialized_response);
     kZmqUtil->send_string(serialized_response, &func_call_socket);
 
-    std::cout << "sent to client" << std::endl;
+    std::cout << "sent to client with key " << call.response_key() << std::endl;
 }

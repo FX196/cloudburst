@@ -31,7 +31,7 @@ KvsClientInterface *kvs_mock = &kvs_mock_client;
 
 SchedulerPolicyInterface *kSchedulerPolicy;
 
-zmq::context_t context;
+zmq::context_t context(1);
 SocketCache pusher_cache = SocketCache(&context, ZMQ_PUSH);
 
 zmq::socket_t pin_accept_socket = zmq::socket_t(context, ZMQ_PULL);
