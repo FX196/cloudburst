@@ -15,6 +15,7 @@
 
 void function_call_handler(string serialized, zmq::socket_t &func_call_socket,
 SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
+    std::cout << "received function call" << std::endl;
     FunctionCall call;
     call.ParseFromString(serialized);
 
@@ -23,10 +24,12 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     }
 
     // pick a node for this request.
+    std::cout << "retrieving references" << std::endl;
     vector<string> refs;
     for(auto ref : call.references()){
         refs.push_back(ref);
     }
+    std::cout << "picking executor" << std::endl;
     pair<Address, unsigned> result = policy->pick_executor(refs);
 
     GenericResponse response;
@@ -39,6 +42,7 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
         return;
     }
 
+    std::cout << "forwarding request" << std::endl;
     // Forward the request on to the chosen executor node.
     Address ip = result.first;
     unsigned tid = result.second;
