@@ -50,10 +50,13 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     call.SerializeToString(&serialized_send);
     kZmqUtil->send_string(serialized_send, &pusher_cache[ip]);
 
+    std::cout << "sent to executor" << std::endl;
 
     response.set_success(true);
     response.set_response_id(call.response_key());
     string serialized_response;
     response.SerializeToString(&serialized_response);
     kZmqUtil->send_string(serialized_response, &func_call_socket);
+
+    std::cout << "sent to client" << std::endl;
 }

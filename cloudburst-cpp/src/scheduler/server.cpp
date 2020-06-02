@@ -117,7 +117,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
     DefaultSchedulerPolicy policy(pin_accept_socket, pusher_cache, kvs, ip, log, 0.20, true);
     kSchedulerPolicy = &policy;
 
-
+    std::cout << "Scheduler Started" << std::endl;
 
     // Enter event loop
     while(true){
