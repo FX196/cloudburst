@@ -26,6 +26,7 @@ USER root
 WORKDIR $HYDRO_HOME/cloudburst
 RUN git remote remove origin && git remote add origin https://github.com/$repo_org/cloudburst
 RUN git fetch origin && git checkout -b $build_branch origin/$source_branch
+RUN git pull --recurse-submodules origin master
 RUN bash scripts/build.sh
 WORKDIR /
 
