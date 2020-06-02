@@ -230,7 +230,7 @@ class CloudburstConnection():
                 fname_args = [fname_args]
             args = [serializer.dump(arg, serialize=False) for arg in
                     fname_args]
-            refs = [arg.obj_id for arg in args if isinstance(arg, future.CloudburstFuture)]
+            refs = [arg.obj_id for arg in args if isinstance(arg, CloudburstFuture)]
             al = dc.function_args[fname]
             al.values.extend(args)
             al.references.extend(refs)
@@ -298,7 +298,7 @@ class CloudburstConnection():
         for arg in args:
             argobj = call.arguments.values.add()
             serializer.dump(arg, argobj)
-            if isinstance(arg, future.CloudburstFuture):
+            if isinstance(arg, CloudburstFuture):
                 call.references.append(arg.obj_id)
 
         self.func_call_sock.send(call.SerializeToString())
