@@ -174,6 +174,13 @@ public:
 
         hset<ThreadLocation, pair_hash> candidates(unpinned_executors);
 
+        PinFunction pin_msg;
+        pin_msg.set_name(func_ref.name());
+        pin_msg.set_response_address(ip_);
+
+        string serialized;
+        pin_msg.SerializeToString(&serialized);
+
         std::cout << "constructed candidates" << std::endl;
 
         while(true){
@@ -184,20 +191,20 @@ public:
 
             std::cout << "attempting to pin " << func_ref.name() << " at " << executor.first << ":" << executor.second << std::endl;
 
-            kZmqUtil->send_string(ip + ":" + func_ref.name(),
+            kZmqUtil->send_string(ip + ":" + serialized,
                     &(*pusher_cache_ptr)[get_pin_address(executor.first, executor.second)]);
+
+            std::cout << "sent pin request" << std::endl;
 
             GenericResponse response;
             try {
                 response.ParseFromString(kZmqUtil->recv_string(&(*pin_accept_socket_ptr)));
+                std::cout << "received pin response" << std::endl;
             } catch (const zmq::error_t&){
                 log->error("Pin operation to %s:%u timed out. Retrying.",
                         executor.first, executor.second);
                 continue;
             }
-
-            unpinned_executors.erase(executor);
-            candidates.erase(executor);
 
             if(response.success()){
                 pending_dags.at(dag_name).push_back({func_ref.name(), executor});
