@@ -31,15 +31,12 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
         return;
     }
 
-    std::cout << "Creating dag, name: " << dag.name() << std::endl;
-
     log->info("Creating DAG {}.", (dag.name()));
 
     // try to pin all functions in the dag
     for(auto& func_reference: dag.functions()){
         for (int i = 0; i < num_replicas; ++i) {
             // policy will return false if there are no executors to pin this function
-            std::cout << "pinning function " << func_reference.name() << std::endl;
             if(!(policy->pin_function(dag.name(), func_reference))){
                 log->info("Creating DAG %s failed due to insufficient resources", dag.name());
                 GenericResponse error;
@@ -56,8 +53,6 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
         }
     }
 
-    std::cout << "Dag functions pinned" << std::endl;
-
     // We persist the DAG in the KVS, so other schedulers can read the DAG when they hear about it.
     LWWPairLattice<string> payload(TimestampValuePair<string>(generate_timestamp(0), serialized));
     kvs_put(kvs, dag.name(), serialize(payload), log, LatticeType::LWW);
@@ -73,8 +68,6 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     policy->commit_dag(dag.name());
     pair<Dag, set<string>> dag_sources_pair(dag, find_dag_source(dag));
     dags.insert(pair<string, pair<Dag, set<string>>>(dag.name(), dag_sources_pair));
-
-    std::cout << "Committing dag" << std::endl;
 
     // Send ok response
     GenericResponse response;

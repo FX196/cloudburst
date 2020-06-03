@@ -69,8 +69,6 @@ void dag_call_handler(string serialized,
     double start_time = std::chrono::duration<double>(
             std::chrono::system_clock::now().time_since_epoch()).count();
 
-    std::cout << "constructing dag schedule object" << std::endl;
-
     // actuall call the dag
     DagSchedule schedule;
     schedule.set_id(get_random_id());
@@ -154,6 +152,7 @@ void dag_call_handler(string serialized,
         // clear triggers from last function and add triggers for this one
         schedule.clear_triggers();
         for(string trigger : triggers){
+            std::cout << "adding trigger " << trigger << " for function " << fname << std::endl;
             string* add_trigger_ptr = schedule.add_triggers();
             *add_trigger_ptr = trigger;
         }
@@ -168,6 +167,7 @@ void dag_call_handler(string serialized,
 
     // Send triggers for sources
     for(string source : sources){
+        std::cout << "sending triggers for source" << source << std::endl;
         DagTrigger trigger;
         trigger.set_id(schedule.id());
         trigger.set_source("BEGIN");

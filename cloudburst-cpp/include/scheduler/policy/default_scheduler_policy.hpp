@@ -102,8 +102,6 @@ public:
             executor_ips.insert(executor.first);
         }
 
-        std::cout << "generated candidates" << std::endl;
-
         // Count number of references cached at each executor
         for(string reference : references){
             if(key_locations.find(reference) != key_locations.end()){
@@ -139,16 +137,12 @@ public:
             max_executor = candidates[rand() % candidates.size()];
         }
 
-        std::cout << "Found max_executor " << std::endl;
-
         if(max_ip.empty() || (get_random_double() < random_threshold)){
             auto r = rand() % executors.size();
             auto it = executors.begin();
             std::advance(it, r);
             max_executor = *it;
         }
-
-        std::cout << "Chosen executor " << std::endl;
 
 //        if(!running_counts.contains(max_executor)){
 //            running_counts.insert(make_pair(max_executor, set<unsigned>()));
@@ -181,32 +175,23 @@ public:
         string serialized;
         pin_msg.SerializeToString(&serialized);
 
-        std::cout << "constructed candidates" << std::endl;
-
         while(true){
             auto r = rand() % candidates.size();
             auto it = candidates.begin();
             std::advance(it, r);
             ThreadLocation executor = *it;
 
-            std::cout << "attempting to pin " << func_ref.name() << " at " << executor.first << ":" << executor.second << std::endl;
-
             kZmqUtil->send_string(serialized,
                     &(*pusher_cache_ptr)[get_pin_address(executor.first, executor.second)]);
-
-            std::cout << "sent pin request" << std::endl;
 
             GenericResponse response;
             try {
                 response.ParseFromString(kZmqUtil->recv_string(&(*pin_accept_socket_ptr)));
-                std::cout << "received pin response" << std::endl;
             } catch (const zmq::error_t&){
                 log->error("Pin operation to %s:%u timed out. Retrying.",
                         executor.first, executor.second);
                 continue;
             }
-
-            std::cout << "response status: " << response.success() << std::endl;
 
             if(response.success()){
                 pending_dags.at(dag_name).push_back({func_ref.name(), executor});
