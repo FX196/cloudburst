@@ -19,7 +19,6 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
     Dag dag;
     dag.ParseFromString(serialized);
 
-    std::cout << "recieved dag create request" << std::endl;
 
     // We do not allow duplicate DAG names, so we return an error if the name is already taken
     if(dags.find(dag.name()) != dags.end()){

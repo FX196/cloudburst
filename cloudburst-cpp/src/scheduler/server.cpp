@@ -146,6 +146,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
         // receives a dag create request
         if (pollitems[3].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&dag_create_socket);
+            std::cout << "received dag create request" << std::endl;
             dag_create_handler(serialized, dag_create_socket, pusher_cache,
                     kvs, dags, kSchedulerPolicy, call_frequency, log);
         }
@@ -153,6 +154,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
         // receives a dag call request
         if (pollitems[4].revents & ZMQ_POLLIN) {
             string serialized = kZmqUtil->recv_string(&dag_call_socket);
+            std::cout << "received dag call request" << std::endl;
             dag_call_handler(serialized, dag_call_socket, pusher_cache,
                     last_arrivals, interarrivals, dags,
                     kSchedulerPolicy, call_frequency, log);
