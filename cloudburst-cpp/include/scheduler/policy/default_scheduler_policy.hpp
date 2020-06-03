@@ -191,7 +191,7 @@ public:
 
             std::cout << "attempting to pin " << func_ref.name() << " at " << executor.first << ":" << executor.second << std::endl;
 
-            kZmqUtil->send_string(ip + ":" + serialized,
+            kZmqUtil->send_string(serialized,
                     &(*pusher_cache_ptr)[get_pin_address(executor.first, executor.second)]);
 
             std::cout << "sent pin request" << std::endl;
@@ -205,6 +205,8 @@ public:
                         executor.first, executor.second);
                 continue;
             }
+
+            std::cout << "response status: " << response.success() << std::endl;
 
             if(response.success()){
                 pending_dags.at(dag_name).push_back({func_ref.name(), executor});
