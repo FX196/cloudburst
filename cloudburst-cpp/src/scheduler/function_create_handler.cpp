@@ -40,6 +40,7 @@ void function_create_handler(string serialized,
         serialized_val = serialize(val);
     }
     bool success = kvs_put(kvs, name, serialized_val, log, type);
+    std::cout << "Function Put success: " << success << std::endl;
 
     if (!success){
         log->error("Function Body PUT Errored!");

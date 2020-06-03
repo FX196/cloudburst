@@ -20,8 +20,8 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     call.ParseFromString(serialized);
 
     if (call.response_key().empty()){
-        // call.set_response_key(get_random_id());
-        call.set_response_key("521d6db5-7f5c-4523-bf6e-280a4f230626");
+        call.set_response_key(get_random_id());
+        // call.set_response_key("521d6db5-7f5c-4523-bf6e-280a4f230626");
     }
 
     // pick a node for this request.
