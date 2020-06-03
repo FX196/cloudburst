@@ -31,7 +31,7 @@ void dag_create_handler(string serialized, zmq::socket_t &dag_create_socket, Soc
         return;
     }
 
-    std::cout << "Creating dag " << dag.name() << std::endl;
+    std::cout << "Creating dag, name: " << dag.name() << std::endl;
 
     log->info("Creating DAG {}.", (dag.name()));
 

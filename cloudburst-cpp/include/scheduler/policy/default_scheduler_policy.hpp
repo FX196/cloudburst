@@ -88,7 +88,7 @@ public:
             executors.erase(executor_time_point_pair.first);
         }
         for(auto executor_counts_pair : running_counts){
-            if(executor_counts_pair.second.size() > 1000 && get_random_double() > random_threshold){
+            if((executor_counts_pair.second.size() > 1000) && (get_random_double() > random_threshold)){
                 executors.erase(executor_counts_pair.first);
             }
         }
@@ -101,6 +101,8 @@ public:
         for(ThreadLocation executor : executors){
             executor_ips.insert(executor.first);
         }
+
+        std::cout << "generated candidates" << std::endl;
 
         // Count number of references cached at each executor
         for(string reference : references){
@@ -137,12 +139,16 @@ public:
             max_executor = candidates[rand() % candidates.size()];
         }
 
-        if(max_ip.empty() || get_random_double() < random_threshold){
+        std::cout << "Found max_executor " << std::endl;
+
+        if(max_ip.empty() || (get_random_double() < random_threshold)){
             auto r = rand() % executors.size();
             auto it = executors.begin();
             std::advance(it, r);
             max_executor = *it;
         }
+
+        std::cout << "Chosen executor " << std::endl;
 
 //        if(!running_counts.contains(max_executor)){
 //            running_counts.insert(make_pair(max_executor, set<unsigned>()));
