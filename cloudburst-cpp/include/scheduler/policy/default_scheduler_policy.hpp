@@ -174,11 +174,15 @@ public:
 
         hset<ThreadLocation, pair_hash> candidates(unpinned_executors);
 
+        std::cout << "constructed candidates" << std::endl;
+
         while(true){
             auto r = rand() % candidates.size();
             auto it = candidates.begin();
             std::advance(it, r);
             ThreadLocation executor = *it;
+
+            std::cout << "attempting to pin " << func_ref.name() << " at " << executor.first << ":" << executor.second << std::endl;
 
             kZmqUtil->send_string(ip + ":" + func_ref.name(),
                     &(*pusher_cache_ptr)[get_pin_address(executor.first, executor.second)]);
