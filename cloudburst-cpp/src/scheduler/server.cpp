@@ -154,8 +154,8 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
         // receives a dag call request
         if (pollitems[4].revents & ZMQ_POLLIN) {
-            string serialized = kZmqUtil->recv_string(&dag_call_socket);
             std::cout << "received dag call request" << std::endl;
+            string serialized = kZmqUtil->recv_string(&dag_call_socket);
             dag_call_handler(serialized, dag_call_socket, pusher_cache,
                     last_arrivals, interarrivals, dags,
                     kSchedulerPolicy, call_frequency, log);
@@ -163,6 +163,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
         // receives a dag delete request
         if (pollitems[5].revents & ZMQ_POLLIN) {
+            std::cout << "received dag delete request" << std::endl;
             string dag_name = kZmqUtil->recv_string(&dag_delete_socket);
             dag_delete_handler(dag_name, dag_delete_socket, dags,
                     kSchedulerPolicy, call_frequency, log);
@@ -170,12 +171,14 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
         // receives list request
         if (pollitems[6].revents & ZMQ_POLLIN) {
+            std::cout << "received list request" << std::endl;
             string serialized = kZmqUtil->recv_string(&list_socket);
             list_handler(serialized, list_socket, kvs, log);
         }
 
         // receives exec_status request
         if (pollitems[7].revents & ZMQ_POLLIN) {
+            std::cout << "received exec status request" << std::endl;
             string serialized = kZmqUtil->recv_string(&exec_status_socket);
             ThreadStatus threadStatus;
             threadStatus.ParseFromString(serialized);
