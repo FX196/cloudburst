@@ -178,7 +178,6 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
         // receives exec_status request
         if (pollitems[7].revents & ZMQ_POLLIN) {
-            std::cout << "received exec status request" << std::endl;
             string serialized = kZmqUtil->recv_string(&exec_status_socket);
             ThreadStatus threadStatus;
             threadStatus.ParseFromString(serialized);
