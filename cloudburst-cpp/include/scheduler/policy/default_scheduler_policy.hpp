@@ -176,7 +176,7 @@ public:
 
         PinFunction pin_msg;
         pin_msg.set_name(func_ref.name());
-        pin_msg.set_response_address(ip_);
+        pin_msg.set_response_address(ip);
 
         string serialized;
         pin_msg.SerializeToString(&serialized);
