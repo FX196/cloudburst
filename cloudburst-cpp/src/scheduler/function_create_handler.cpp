@@ -45,8 +45,8 @@ void function_create_handler(string serialized,
     if (!success){
         log->error("Function Body PUT Errored!");
     }
-    vector<string> funcs = get_func_list(kvs, "", log, false);
-    funcs.push_back(FUNC_PREFIX+name);
+    vector<string> funcs = get_func_list(kvs, "", log, true);
+    funcs.push_back(name);
     put_func_list(kvs, funcs, log);
 
     GenericResponse ok = GenericResponse();
