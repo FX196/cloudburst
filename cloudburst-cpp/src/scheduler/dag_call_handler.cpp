@@ -113,7 +113,7 @@ void dag_call_handler(string serialized,
         // record assigned locations
         Address ip = result.first;
         unsigned tid = result.second;
-        auto locations_ptr = schedule.mutable_locations();
+        auto* locations_ptr = schedule.mutable_locations();
         (*locations_ptr)[fname] = ip + ':' + std::to_string(tid);
 
         std::cout << "copying over function args" << std::endl;
@@ -130,10 +130,15 @@ void dag_call_handler(string serialized,
     for(auto func_reference : dag.functions()){
         string fname = func_reference.name();
         std::cout << "constructing DagSchedule for function " << fname << std::endl;
-        string location = schedule.locations().at(fname);
+        for (auto pair : schedule.locations()){
+            std::cout << pair.first << std::endl;
+        }
+        auto* locations_ptr = schedule.mutable_locations();
+        string location = (*locations_ptr)[fname];
         std::size_t ind = location.find(":");
         string ip = get_queue_address(location.substr(0, ind), std::stoul(location.substr(ind+1, location.size())));
         schedule.set_target_function(fname);
+        std::cout << "retrieved executor location" << std::endl;
 
         // get predecessors/parents of function
         vector<string> triggers = get_dag_predecessors(dag, fname);
