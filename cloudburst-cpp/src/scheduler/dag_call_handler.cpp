@@ -69,6 +69,8 @@ void dag_call_handler(string serialized,
     double start_time = std::chrono::duration<double>(
             std::chrono::system_clock::now().time_since_epoch()).count();
 
+    std::cout << "constructing dag schedule object" << std::endl;
+
     // actuall call the dag
     DagSchedule schedule;
     schedule.set_id(get_random_id());
@@ -90,12 +92,14 @@ void dag_call_handler(string serialized,
     // construct DagSchedule object
     for(auto func_reference : dag.functions()){
         string fname = func_reference.name();
+        std::cout << "constructing scehdule for " << fname << std::endl;
         vector<string> refs;
         for(auto ref: (call.function_args().at(fname)).references()){
             refs.push_back(ref);
         }
+        std::cout << "copied over function args" << std::endl;
         // try to assign executors for each function
-        pair<Address, unsigned> result = policy->pick_executor(refs);
+        pair<Address, unsigned> result = policy->pick_executor(refs, fname);
         if (result.first == ""){
             GenericResponse response;
             response.set_success(false);
@@ -113,9 +117,8 @@ void dag_call_handler(string serialized,
         (*locations_ptr)[fname] = ip + ':' + std::to_string(tid);
 
         // copy over arguments
-        auto func_args_ptr = call.mutable_function_args();
         auto sched_args_ptr = schedule.mutable_arguments();
-        for(auto value : (*func_args_ptr)[fname].values()){
+        for(auto value : call.function_args().at(fname).values()){
             Value* add_val_ptr = (*sched_args_ptr)[fname].add_values();
             *add_val_ptr = value;
         }
