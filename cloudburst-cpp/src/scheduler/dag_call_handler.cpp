@@ -94,8 +94,10 @@ void dag_call_handler(string serialized,
         string fname = func_reference.name();
         std::cout << "constructing scehdule for " << fname << std::endl;
         vector<string> refs;
-        for(auto ref: (call.function_args().at(fname)).references()){
-            refs.push_back(ref);
+        if (call.function_args().contains(fname)){
+            for(auto ref: (call.function_args().at(fname)).references()){
+                refs.push_back(ref);
+            }
         }
 
         // try to assign executors for each function
