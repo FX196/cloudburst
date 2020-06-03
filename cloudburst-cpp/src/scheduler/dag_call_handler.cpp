@@ -97,7 +97,7 @@ void dag_call_handler(string serialized,
         for(auto ref: (call.function_args().at(fname)).references()){
             refs.push_back(ref);
         }
-        std::cout << "copied over function args" << std::endl;
+
         // try to assign executors for each function
         pair<Address, unsigned> result = policy->pick_executor(refs, fname);
         if (result.first == ""){
@@ -116,19 +116,21 @@ void dag_call_handler(string serialized,
         auto locations_ptr = schedule.mutable_locations();
         (*locations_ptr)[fname] = ip + ':' + std::to_string(tid);
 
+        std::cout << "copying over function args" << std::endl;
         // copy over arguments
         auto sched_args_ptr = schedule.mutable_arguments();
         for(auto value : call.function_args().at(fname).values()){
             Value* add_val_ptr = (*sched_args_ptr)[fname].add_values();
             *add_val_ptr = value;
         }
+        std::cout << "copied over function args" << std::endl;
     }
 
     // send DagSchedule's for all functions
     for(auto func_reference : dag.functions()){
         string fname = func_reference.name();
-        auto locations_ptr = schedule.mutable_locations();
-        string location = (*locations_ptr)[fname];
+        std::cout << "constructing DagSchedule for function " << fname << std::endl;
+        string location = schedule.locations().at(fname);
         std::size_t ind = location.find(":");
         string ip = get_queue_address(location.substr(0, ind), std::stoul(location.substr(ind+1, location.size())));
         schedule.set_target_function(fname);
@@ -146,6 +148,10 @@ void dag_call_handler(string serialized,
             string* add_trigger_ptr = schedule.add_triggers();
             *add_trigger_ptr = trigger;
         }
+
+        std::cout << "added triggers for function" << fname << std::endl;
+
+
         string serialized_schedule;
         schedule.SerializeToString(&serialized_schedule);
         kZmqUtil->send_string(serialized_schedule, &pusher_cache[ip]);
