@@ -121,9 +121,11 @@ void dag_call_handler(string serialized,
         std::cout << "copying over function args" << std::endl;
         // copy over arguments
         auto sched_args_ptr = schedule.mutable_arguments();
-        for(auto value : call.function_args().at(fname).values()){
-            Value* add_val_ptr = (*sched_args_ptr)[fname].add_values();
-            *add_val_ptr = value;
+        if (call.function_args().find(fname) != call.function_args().end()){
+            for(auto value : call.function_args().at(fname).values()){
+                Value* add_val_ptr = (*sched_args_ptr)[fname].add_values();
+                *add_val_ptr = value;
+            }
         }
         std::cout << "copied over function args" << std::endl;
     }
