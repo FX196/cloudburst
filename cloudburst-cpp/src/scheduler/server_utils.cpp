@@ -116,8 +116,10 @@ vector <string> get_func_list(KvsClientInterface *kvs, string prefix, logger log
     vector <string> result;
     for (const string &func : funcs) {
         // TODO: do we need to decode utf8?
-        if (func.find(prefix) == 0) { // TODO: startswith
+        if (func.rfind(prefix, 0) == 0) { // TODO: startswith
+            std::cout << "push back function: " << func << std::endl;
             if (!fullname) {
+                std::cout << "substring: " << func.substr(prefix.length()) << std::endl;
                 result.push_back(func.substr(prefix.length()));
             } else {
                 result.push_back(func);
