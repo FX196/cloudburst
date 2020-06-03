@@ -84,7 +84,7 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
     zmq::socket_t dag_delete_socket(context, ZMQ_REP);
     dag_delete_socket.bind(get_bind_address(DAG_DELETE_PORT));
 
-    zmq::socket_t list_socket(context, ZMQ_PULL);
+    zmq::socket_t list_socket(context, ZMQ_REP);
     list_socket.bind(get_bind_address(LIST_PORT));
 
     zmq::socket_t exec_status_socket(context, ZMQ_PULL);
