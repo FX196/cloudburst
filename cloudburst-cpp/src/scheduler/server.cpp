@@ -139,14 +139,15 @@ void run_scheduler(string ip, string mgmt_ip, string route_addr){
 
         // receives a function call request
         if (pollitems[2].revents & ZMQ_POLLIN) {
+            std::cout << "received function call request" << std::endl;
             string serialized = kZmqUtil->recv_string(&func_call_socket);
             function_call_handler(serialized, func_call_socket, pusher_cache, kSchedulerPolicy, log);
         }
 
         // receives a dag create request
         if (pollitems[3].revents & ZMQ_POLLIN) {
-            string serialized = kZmqUtil->recv_string(&dag_create_socket);
             std::cout << "received dag create request" << std::endl;
+            string serialized = kZmqUtil->recv_string(&dag_create_socket);
             dag_create_handler(serialized, dag_create_socket, pusher_cache,
                     kvs, dags, kSchedulerPolicy, call_frequency, log);
         }
