@@ -133,7 +133,7 @@ void dag_call_handler(string serialized,
         string fname = func_reference.name();
         std::cout << "constructing DagSchedule for function " << fname << std::endl;
         for (auto pair : schedule.locations()){
-            std::cout << pair.first << std::endl;
+            std::cout << pair.first << " " << pair.second << std::endl;
         }
         auto* locations_ptr = schedule.mutable_locations();
         string location = (*locations_ptr)[fname];
@@ -157,7 +157,7 @@ void dag_call_handler(string serialized,
             *add_trigger_ptr = trigger;
         }
 
-        std::cout << "added triggers for function" << fname << std::endl;
+        std::cout << "added triggers for function " << fname << std::endl;
 
 
         string serialized_schedule;
@@ -167,7 +167,7 @@ void dag_call_handler(string serialized,
 
     // Send triggers for sources
     for(string source : sources){
-        std::cout << "sending triggers for source" << source << std::endl;
+        std::cout << "sending triggers for source " << source << std::endl;
         DagTrigger trigger;
         trigger.set_id(schedule.id());
         trigger.set_source("BEGIN");
