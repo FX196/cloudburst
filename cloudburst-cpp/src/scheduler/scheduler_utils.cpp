@@ -37,16 +37,14 @@ set<string> find_dag_source(Dag dag){
     set<string> sinks;
     for(const auto& conn : dag.connections()){
         sinks.insert(conn.sink());
-        std::cout << "source: " << conn.source() << " sink: " << conn.sink() << std::endl;
     }
 
 
     set<string> funcs;
     for(const auto& func_reference : dag.functions()){
         string fname = func_reference.name();
-        if(sinks.find(fname) != sinks.end()){
+        if(sinks.find(fname) == sinks.end()){
             funcs.insert(fname);
-            std::cout << "inserting source: " << fname << std::endl;
         }
     }
 
