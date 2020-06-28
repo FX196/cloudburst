@@ -19,8 +19,8 @@
 
 TEST_F(PolicyTest, IgnoreOverloaded){
     string ip = "127.0.0.1";
-    kSchedulerPolicy->unpinned_executors.insert({ip, 1});
-    kSchedulerPolicy->unpinned_executors.insert({ip, 2});
+    kSchedulerPolicy->unpinned_cpu_executors.insert({ip, 1});
+    kSchedulerPolicy->unpinned_cpu_executors.insert({ip, 2});
 
     kSchedulerPolicy->backoff[{ip, 1}] = std::chrono::system_clock::now();
     for(int i=0; i<1100; i++){
@@ -35,8 +35,8 @@ TEST_F(PolicyTest, IgnoreOverloaded){
 
 TEST_F(PolicyTest, PinReject){
     string ip = "127.0.0.1";
-    kSchedulerPolicy->unpinned_executors.insert({ip, 1});
-    kSchedulerPolicy->unpinned_executors.insert({ip, 2});
+    kSchedulerPolicy->unpinned_cpu_executors.insert({ip, 1});
+    kSchedulerPolicy->unpinned_cpu_executors.insert({ip, 2});
 
     GenericResponse ok;
     ok.set_success(true);
@@ -51,12 +51,12 @@ TEST_F(PolicyTest, PinReject){
     Dag::FunctionReference fref;
     fref.set_name("function");
 
-    bool success = kSchedulerPolicy->pin_function("dag", fref);
+    bool success = kSchedulerPolicy->pin_function("dag", fref, {});
     EXPECT_EQ(success, true);
 
     // Ensure that both remaining executors have been removed from unpinned
     // and that the DAG commit is pending.
-    EXPECT_EQ(kSchedulerPolicy->unpinned_executors.size(), 0);
+    EXPECT_EQ(kSchedulerPolicy->unpinned_cpu_executors.size(), 0);
     EXPECT_EQ(kSchedulerPolicy->pending_dags.size(), 1);
 }
 
@@ -79,7 +79,7 @@ TEST_F(PolicyTest, ProcessStatus){
 
     ThreadLocation loc = {status.ip(), status.tid()};
 
-    EXPECT_EQ(kSchedulerPolicy->unpinned_executors.find(loc), kSchedulerPolicy->unpinned_executors.end());
+    EXPECT_EQ(kSchedulerPolicy->unpinned_cpu_executors.find(loc), kSchedulerPolicy->unpinned_cpu_executors.end());
     EXPECT_EQ(kSchedulerPolicy->function_locations[function_name].size(), 2);
     EXPECT_NE(kSchedulerPolicy->function_locations[function_name].find(loc), kSchedulerPolicy->function_locations[function_name].end());
     EXPECT_NE(kSchedulerPolicy->backoff.find(loc), kSchedulerPolicy->backoff.end());
@@ -108,7 +108,7 @@ TEST_F(PolicyTest, ProcessStatusRestart){
     kSchedulerPolicy->process_status(status);
 
     EXPECT_EQ(kSchedulerPolicy->function_locations[function_name].size(), 0);
-    EXPECT_NE(kSchedulerPolicy->unpinned_executors.find(loc), kSchedulerPolicy->unpinned_executors.end());
+    EXPECT_NE(kSchedulerPolicy->unpinned_cpu_executors.find(loc), kSchedulerPolicy->unpinned_cpu_executors.end());
 }
 
 TEST_F(PolicyTest, ProcessStatusNotRunning){
@@ -138,7 +138,7 @@ TEST_F(PolicyTest, ProcessStatusNotRunning){
     kSchedulerPolicy->process_status(status);
 
     EXPECT_EQ(kSchedulerPolicy->thread_statuses.find(loc), kSchedulerPolicy->thread_statuses.end());
-    EXPECT_EQ(kSchedulerPolicy->unpinned_executors.find(loc), kSchedulerPolicy->unpinned_executors.end());
+    EXPECT_EQ(kSchedulerPolicy->unpinned_cpu_executors.find(loc), kSchedulerPolicy->unpinned_cpu_executors.end());
     EXPECT_EQ(kSchedulerPolicy->function_locations[function_name].size(), 0);
 }
 

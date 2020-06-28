@@ -21,7 +21,8 @@ void dag_call_handler(string serialized,
                       map<string, pair<Dag, set<string>>> &dags,
                       SchedulerPolicyInterface *policy,
                       map<string, unsigned> &call_frequency,
-                      logger log){
+                      logger log,
+                      string request_id){
     DagCall call;
     call.ParseFromString(serialized);
     string name = call.name();
@@ -71,11 +72,21 @@ void dag_call_handler(string serialized,
 
     // actuall call the dag
     DagSchedule schedule;
-    schedule.set_id(get_random_id());
     auto* dag_ptr = schedule.mutable_dag();
     *dag_ptr = dag;
     schedule.set_start_time(start_time);
     schedule.set_consistency(call.consistency());
+
+    if(request_id.empty()){
+        schedule.set_id(get_random_id());
+    } else {
+        schedule.set_id(request_id);
+    }
+
+    if(call.has_continuation()){
+        Continuation cont = schedule.continuation();
+        cont.CopyFrom(call.continuation());
+    }
 
     if(call.response_address() != ""){
         schedule.set_response_address(call.response_address());
@@ -99,7 +110,15 @@ void dag_call_handler(string serialized,
         }
 
         // try to assign executors for each function
-        pair<Address, unsigned> result = policy->pick_executor(refs, fname);
+        vector<string> colocated;
+        for (auto func : dag.colocated()){
+            if (fname.compare(func) == 0){
+                colocated = vector<string>(
+                    dag.colocated().begin(), dag.colocated().end());
+                break;
+            }
+        }
+        pair<Address, unsigned> result = policy->pick_executor(refs, fname, colocated);
         if (result.first == ""){
             GenericResponse response;
             response.set_success(false);

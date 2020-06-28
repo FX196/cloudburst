@@ -111,7 +111,7 @@ public:
         kSchedulerPolicy->running_counts.clear();
         kSchedulerPolicy->backoff.clear();
         kSchedulerPolicy->key_locations.clear();
-        kSchedulerPolicy->unpinned_executors.clear();
+        kSchedulerPolicy->unpinned_cpu_executors.clear();
         kSchedulerPolicy->function_locations.clear();
         kSchedulerPolicy->pending_dags.clear();
         kSchedulerPolicy->thread_statuses.clear();

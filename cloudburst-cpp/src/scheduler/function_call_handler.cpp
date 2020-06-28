@@ -46,6 +46,7 @@ SocketCache &pusher_cache, SchedulerPolicyInterface *policy, logger log){
     unsigned tid = result.second;
     string serialized_send;
     call.SerializeToString(&serialized_send);
+    std::cout << get_exec_address(ip, tid) << std::endl;
     kZmqUtil->send_string(serialized_send, &pusher_cache[get_exec_address(ip, tid)]);
 
     response.set_success(true);

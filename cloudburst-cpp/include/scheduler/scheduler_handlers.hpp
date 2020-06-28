@@ -44,7 +44,8 @@ void dag_call_handler(string serialized,
         map<string, pair<Dag, set <string>>> &dags,
         SchedulerPolicyInterface *policy,
         map<string, unsigned> &call_frequency,
-        logger log);
+        logger log,
+        string request_id="");
 
 void dag_delete_handler(string dag_name, zmq::socket_t &dag_delete_socket, map <string, pair<Dag, set < string>>> &dags,
                         SchedulerPolicyInterface *policy, map<string, unsigned> &call_frequency, logger log);

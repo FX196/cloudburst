@@ -72,7 +72,7 @@ TEST_F(SchedulerHandlerTest, FunctionCallSuccess){
     string serialized_call;
     call.SerializeToString(&serialized_call);
 
-    mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("tcp://127.0.0.1:6000", 0));
+    mock_policy.pick_executor_responses_.push_back(pair<Address, unsigned>("127.0.0.1", 0));
 
 
     zmq::socket_t func_call_socket(context, ZMQ_REP);

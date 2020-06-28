@@ -40,7 +40,9 @@ public:
 
     map<string, set<Address>> key_locations;
 
-    hset<ThreadLocation, pair_hash> unpinned_executors;
+    hset<ThreadLocation, pair_hash> unpinned_cpu_executors;
+
+    hset<ThreadLocation, pair_hash> unpinned_gpu_executors;
 
     map<string, hset<ThreadLocation, pair_hash>> function_locations;
 
@@ -68,7 +70,8 @@ public:
     running_counts(),
     backoff(),
     key_locations(),
-    unpinned_executors(),
+    unpinned_cpu_executors(),
+    unpinned_gpu_executors(),
     function_locations(),
     pending_dags(),
     thread_statuses(),
@@ -77,9 +80,9 @@ public:
     local(local),
     log(log) {}
 
-    virtual ThreadLocation pick_executor(const vector<string>& references, string function_name = "") = 0;
+    virtual ThreadLocation pick_executor(const vector<string>& references, string function_name = "", vector<string> colocated={}, DagSchedule schedule=DagSchedule()) = 0;
 
-    virtual bool pin_function(string dag_name, const Dag::FunctionReference& func_ref) = 0;
+    virtual bool pin_function(string dag_name, const Dag::FunctionReference& func_ref, vector<string> colocated) = 0;
 
     virtual void commit_dag(string dag_name) = 0;
 

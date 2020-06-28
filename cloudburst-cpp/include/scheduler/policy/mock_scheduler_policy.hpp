@@ -9,7 +9,7 @@
 
 class MockSchedulerPolicy : public SchedulerPolicyInterface {
 public:
-    ThreadLocation pick_executor(const vector<string>& references, string function_name = ""){
+    ThreadLocation pick_executor(const vector<string>& references, string function_name = "", vector<string> colocated={}, DagSchedule schedule=DagSchedule()){
         if(pick_executor_responses_.size() == 0) {
             std::cout << "Ran out of responses! Fix your test" << std::endl;
             return ThreadLocation("", 0);
@@ -19,7 +19,7 @@ public:
         return response;
     }
 
-    bool pin_function(string dag_name, const Dag::FunctionReference& func_ref){
+    bool pin_function(string dag_name, const Dag::FunctionReference& func_ref, vector<string> colocated){
         if(pin_function_responses_.size() == 0) {
             std::cout << "Ran out of responses! Fix your test" << std::endl;
             return false;

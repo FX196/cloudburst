@@ -34,7 +34,7 @@ public:
 //
 //    map<string, set<Address>> key_locations;
 //
-//    hset<ThreadLocation, pair_hash> unpinned_executors;
+//    hset<ThreadLocation, pair_hash> unpinned_cpu_executors;
 //
 //    map<string, hset<ThreadLocation, pair_hash>> function_locations;
 //
@@ -58,7 +58,7 @@ public:
 //            running_counts(pmap<ThreadLocation, set<unsigned>>()),
 //            backoff(pmap<ThreadLocation, TimePoint>()),
 //            key_locations(map<string, set<Address>>()),
-//            unpinned_executors(),
+//            unpinned_cpu_executors(),
 //            function_locations(map<string, hset<ThreadLocation, pair_hash>>()),
 //            pending_dags(map<string, vector<pair<string, ThreadLocation>>>()),
 //            thread_statuses(pmap<ThreadLocation, ThreadStatus>()),
@@ -72,7 +72,7 @@ public:
             SchedulerPolicyInterface(pin_accept_socket, pusher_cache,  kvs,
                                      ip, log, random_threshold, local) {}
 
-    ThreadLocation pick_executor(const vector<string>& references, string function_name){
+    ThreadLocation pick_executor(const vector<string>& references, string function_name = "", vector<string> colocated={}, DagSchedule schedule=DagSchedule()){
         // Construct a map which maps from IP addresses to the number of
         // relevant arguments they have cached. For the time begin, we will
         // just pick the machine that has the most number of keys cached.
@@ -82,8 +82,27 @@ public:
         if(!function_name.empty()){
             executors = hset<ThreadLocation, pair_hash>(function_locations.at(function_name));
         } else {
-            executors = hset<ThreadLocation, pair_hash>(unpinned_executors);
+            executors = hset<ThreadLocation, pair_hash>(unpinned_cpu_executors);
         }
+
+        // First priority is scheduling things on the same node if possible.
+        // Otherwise, continue on with the regular policy.
+        if(!colocated.empty()){
+            set<Address> candidate_nodes;
+            for(string fn : colocated){
+                if(schedule.locations().find(fn) != schedule.locations().end()){
+                    string loc = schedule.locations().at(fn);
+                    string ip = loc.substr(0, loc.find(":"));
+                    candidate_nodes.insert(ip);
+                }
+            }
+            for(ThreadLocation loc : executors){
+                if(candidate_nodes.find(loc.first) != candidate_nodes.end()){
+                    return loc;
+                }
+            }
+        }
+
         for(auto executor_time_point_pair : backoff){
             executors.erase(executor_time_point_pair.first);
         }
@@ -150,15 +169,17 @@ public:
         running_counts[max_executor].insert(get_time_since_epoch());
 
         if(function_name.empty()){
-            unpinned_executors.erase(max_executor);
+            unpinned_cpu_executors.erase(max_executor);
         }
 
         unique_executors.insert(max_executor);
         return max_executor;
     }
 
-    bool pin_function(string dag_name, const Dag::FunctionReference& func_ref){
-        if(unpinned_executors.size() == 0){
+    bool pin_function(string dag_name, const Dag::FunctionReference& func_ref, vector<string> colocated){
+        if(func_ref.gpu() && unpinned_gpu_executors.size() == 0){
+            return false;
+        } else if(!func_ref.gpu() && unpinned_cpu_executors.size() == 0){
             return false;
         }
 
@@ -166,7 +187,11 @@ public:
             pending_dags.insert(make_pair(dag_name, vector<pair<string, ThreadLocation>>()));
         }
 
-        hset<ThreadLocation, pair_hash> candidates(unpinned_executors);
+        if(func_ref.gpu()){
+            
+        }
+
+        hset<ThreadLocation, pair_hash> candidates(unpinned_cpu_executors);
 
         PinFunction pin_msg;
         pin_msg.set_name(func_ref.name());
@@ -253,12 +278,12 @@ public:
                     thread_statuses.erase(key);
                 }
             }
-            unpinned_executors.erase(key);
+            unpinned_cpu_executors.erase(key);
             return;
         }
 
         if(status.functions_size() == 0){
-            unpinned_executors.insert(key);
+            unpinned_cpu_executors.insert(key);
         }
 
         if((thread_statuses.find(key) != thread_statuses.end())&&

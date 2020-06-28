@@ -143,7 +143,7 @@ class TestSchedulerCreate(unittest.TestCase):
 
         # Add relevant metadata to the policy engine.
         address_set = {(self.ip, 1), (self.ip, 2)}
-        self.policy.unpinned_executors.update(address_set)
+        self.policy.unpinned_cpu_executors.update(address_set)
 
         # Prepopulate the pin_accept socket with sufficient success messages.
         self.pin_socket.inbox.append(sutils.ok_resp)
@@ -196,7 +196,7 @@ class TestSchedulerCreate(unittest.TestCase):
                             self.pusher_cache.addresses)
 
         # Test that the policy engine has the correct metadata stored.
-        self.assertEqual(len(self.policy.unpinned_executors), 0)
+        self.assertEqual(len(self.policy.unpinned_cpu_executors), 0)
         self.assertEqual(len(self.policy.pending_dags), 0)
         self.assertTrue(source in self.policy.function_locations)
         self.assertTrue(sink in self.policy.function_locations)
@@ -223,7 +223,7 @@ class TestSchedulerCreate(unittest.TestCase):
 
         # Add relevant metadata to the policy engine.
         address_set = {(self.ip, 1), (self.ip, 2)}
-        self.policy.unpinned_executors.update(address_set)
+        self.policy.unpinned_cpu_executors.update(address_set)
 
         # Attempt to create the DAG.
         call_frequency = {}
@@ -239,7 +239,7 @@ class TestSchedulerCreate(unittest.TestCase):
 
         # Check that no additional metadata was created or sent.
         self.assertEqual(len(self.pusher_cache.socket.outbox), 0)
-        self.assertEqual(len(self.policy.unpinned_executors), 2)
+        self.assertEqual(len(self.policy.unpinned_cpu_executors), 2)
         self.assertEqual(len(self.policy.function_locations), 0)
         self.assertEqual(len(self.policy.pending_dags), 0)
 
@@ -263,7 +263,7 @@ class TestSchedulerCreate(unittest.TestCase):
         # Add relevant metadata to the policy engine, but set the number of
         # executors to fewer than needed.
         address_set = {(self.ip, 1)}
-        self.policy.unpinned_executors.update(address_set)
+        self.policy.unpinned_cpu_executors.update(address_set)
 
         # Prepopulate the pin_accept socket with sufficient success messages.
         self.pin_socket.inbox.append(sutils.ok_resp)
@@ -300,7 +300,7 @@ class TestSchedulerCreate(unittest.TestCase):
         self.assertEqual(get_unpin_address(*address), addresses[1])
 
         # Check that no additional messages were sent.
-        self.assertEqual(len(self.policy.unpinned_executors), 0)
+        self.assertEqual(len(self.policy.unpinned_cpu_executors), 0)
         self.assertEqual(len(self.policy.function_locations), 0)
         self.assertEqual(len(self.policy.pending_dags), 0)
 
@@ -380,4 +380,4 @@ class TestSchedulerCreate(unittest.TestCase):
         # Check that no additional messages were sent and no metadata changed.
         self.assertEqual(len(self.pusher_cache.socket.outbox), 0)
         self.assertEqual(len(self.policy.function_locations), 0)
-        self.assertEqual(len(self.policy.unpinned_executors), 0)
+        self.assertEqual(len(self.policy.unpinned_cpu_executors), 0)
