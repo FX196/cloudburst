@@ -25,8 +25,8 @@ if [[ "$TRAVIS_BRANCH" = "master" ]] && [[ "$TRAVIS_PULL_REQUEST" = "false" ]]; 
   docker build . -f cloudburst.dockerfile -t hydroproject/cloudburst
   docker build . -f cloudburst-gpu.dockerfile -t hydroproject/cloudburst-gpu
 
-  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+#  echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
 
-  docker push hydroproject/cloudburst
-  docker push hydroproject/cloudburst-gpu
+#  docker push hydroproject/cloudburst
+#  docker push hydroproject/cloudburst-gpu
 fi

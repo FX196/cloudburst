@@ -130,7 +130,7 @@ class TestSchedulerCall(unittest.TestCase):
         call.request_id = 12
         val = call.arguments.values.add()
         serializer.dump(CloudburstReference(ref_name, True), val)
-        self.socket.inbox.append(call.SerializeToString(0))
+        self.socket.inbox.append(call.SerializeToString())
 
         # Execute the scheduling policy.
         call_function(self.socket, self.pusher_cache, self.policy)
