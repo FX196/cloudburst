@@ -39,6 +39,7 @@ RUN cd client/python && python3.6 setup.py install
 WORKDIR /
 
 # Install SETI-related packages
+RUN apt-get update
 RUN apt-get install -y apt-utils python3 \
  python3-pip \
  python3-dev \
