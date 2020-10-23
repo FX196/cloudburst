@@ -39,6 +39,7 @@ RUN cd client/python && python3.6 setup.py install
 WORKDIR /
 
 # Install SETI-related packages
+ENV DEBIAN_FRONTEND=noninteractive
 RUN apt-get update
 RUN apt-get install -y apt-utils python3 \
  python3-pip \
@@ -48,7 +49,7 @@ RUN apt-get install -y apt-utils python3 \
  gfortran \
  pkg-config \
  git curl wget \
- libomp-dev
+ libomp5 libomp-dev
 
 RUN apt-get install -y build-essential
 
