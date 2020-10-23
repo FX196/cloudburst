@@ -39,6 +39,22 @@ RUN cd client/python && python3.6 setup.py install
 WORKDIR /
 
 # Install SETI-related packages
+RUN apt-get install -y apt-utils python3 \
+ python3-pip \
+ python3-dev \
+ python-opencv \
+ libhdf5-serial-dev \
+ gfortran \
+ pkg-config \
+ git curl wget \
+ libomp-dev
+
+RUN apt-get install -y build-essential
+
+ENV CFLAGS="-I/usr/include/hdf5/serial -L/usr/lib/x86_64-linux-gnu/hdf5/serial"
+RUN ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial.so /usr/lib/x86_64-linux-gnu/libhdf5.so
+RUN ln -s /usr/lib/x86_64-linux-gnu/libhdf5_serial_hl.so /usr/lib/x86_64-linux-gnu/libhdf5_hl.so
+
 RUN git clone https://github.com/UCBerkeleySETI/BL-Reservoir.git
 RUN pip3 install -r BL-Reservoir/energy_detection/requirements.txt
 
